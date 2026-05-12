@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -91,10 +91,11 @@ button,.btn{font-family:inherit;font-size:13px;font-weight:600;border:1px solid 
 .tab-panel.active{display:block}
 
 /* ─── FILTERS ─── */
-.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:14px}
-.filter-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;box-shadow:var(--shadow-sm);min-width:0}
-.filter-card label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);font-weight:700;margin-bottom:6px}
-select,input[type=date]{border:1px solid var(--border-strong);border-radius:6px;padding:7px 10px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px;outline:none;width:100%;min-width:0}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-bottom:12px;padding:8px;background:rgba(255,255,255,.56);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:visible;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-card{background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;min-width:0}
+.filter-card label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:700;margin-bottom:4px}
+select,input[type=date]{border:1px solid var(--border-strong);border-radius:6px;padding:5px 8px;background:var(--surface);color:var(--text);font-family:inherit;font-size:12px;outline:none;width:100%;min-width:0}
 select:focus,input[type=date]:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,191,.10)}
 select option{color:#111}
 
@@ -124,8 +125,15 @@ h3{font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:10px;tex
 /* ─── GRIDS ─── */
 .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
-.action-card{min-height:120px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;align-items:start}
+.action-card{min-height:0;position:relative;overflow:hidden;border-top:3px solid var(--blue);padding-top:22px}
+.action-card:after{content:"";position:absolute;right:-26px;top:-32px;width:86px;height:86px;border-radius:50%;background:rgba(26,95,191,.06);pointer-events:none}
+#alertasArea .action-card:nth-child(1){border-top-color:var(--indigo)}
+#alertasArea .action-card:nth-child(2){border-top-color:var(--cyan)}
+#alertasArea .action-card:nth-child(3){border-top-color:var(--green)}
+#alertasArea .action-card:nth-child(1):after{background:rgba(79,70,229,.07)}
+#alertasArea .action-card:nth-child(2):after{background:rgba(8,145,178,.08)}
+#alertasArea .action-card:nth-child(3):after{background:rgba(13,153,104,.08)}
 .action-card p{color:var(--text);font-size:13px;line-height:1.6;font-weight:500}
 
 /* ─── TABLES ─── */
@@ -212,13 +220,30 @@ tbody tr:last-child td{border-bottom:0}
 .empty{text-align:center;color:var(--text-muted);padding:30px;font-size:13px;font-style:italic}
 .small-note{font-size:12px;color:var(--text-muted);margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .meta-note{margin:-6px 0 12px;color:var(--text-muted);font-size:12px;line-height:1.45;font-weight:600}
+.clickable-card{cursor:pointer}
+.clickable-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+
+/* ─── MODAL ─── */
+.fade-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:300;backdrop-filter:blur(3px)}
+.fade-modal.active{display:flex}
+.modal-card{width:min(760px,100%);max-height:86vh;overflow:auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 24px 70px rgba(15,23,42,.28);padding:20px}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.modal-head h2{border:0;margin:0;padding:0;color:var(--text);font-size:15px}
+.modal-close{width:34px;height:34px;align-items:center;justify-content:center;padding:0;border-radius:999px}
+.tech-list-modal{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.tech-modal-btn{justify-content:space-between;background:var(--surface-alt);border-color:var(--border);color:var(--text);padding:11px 12px}
+.tech-modal-btn:hover{background:#eef4ff;color:var(--blue)}
+.modal-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
 /* ─── EXPORT SHELL ─── */
-.export-capture-shell{position:fixed;left:-9999px;top:0;width:900px;background:#f7f9fc;padding:20px;font-family:'IBM Plex Sans',sans-serif}
-.export-report-header{padding:16px 18px;border-radius:var(--radius-lg);background:var(--navy);margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.export-capture-shell{position:fixed;left:-9999px;top:0;width:980px;background:#f7f9fc;padding:20px;font-family:'IBM Plex Sans',sans-serif;color:#1e293b}
+.export-report-header{padding:16px 18px;border-radius:var(--radius-lg);background:linear-gradient(135deg,#162540,#1a5fbf);margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
 .export-report-header h1{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
 .export-report-header p{font-size:12px;color:rgba(255,255,255,.65)}
-.export-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.export-filter-line{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.export-filter-pill{background:#fff;border:1px solid #dde3ed;border-radius:999px;padding:6px 11px;font-size:11px;font-weight:700;color:#334155}
+.export-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
 .exec-chip{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;min-width:0}
 .exec-chip .exec-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:3px}
 .exec-chip .exec-value{font-size:13px;font-weight:700;color:var(--navy);line-height:1.25;overflow-wrap:anywhere}
@@ -226,6 +251,13 @@ tbody tr:last-child td{border-bottom:0}
 .export-capture-shell .tech-code{font-size:9.5px}
 .export-capture-shell .meta-note{font-size:11px;margin:-4px 0 10px}
 .export-capture-shell .meta-vt{font-size:10px;padding:3px 6px;min-width:44px}
+.export-capture-shell .card{box-shadow:0 2px 10px rgba(15,23,42,.08);border-color:#d8e1ee;border-radius:12px;margin-bottom:14px}
+.export-capture-shell .table-wrap{overflow:visible;border-radius:10px}
+.export-capture-shell table{min-width:0;font-size:11px}
+.export-capture-shell thead th{font-size:8.5px;padding:8px 7px}
+.export-capture-shell td{padding:7px 7px}
+.export-capture-shell .group-row td{padding:6px 8px}
+.export-capture-shell .filters,.export-capture-shell .export-row{display:none!important}
 
 /* ─── RESPONSIVE ─── */
 @media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}}
@@ -246,9 +278,10 @@ tbody tr:last-child td{border-bottom:0}
   .kpi-value{font-size:22px}
   .container,.import-bar,.status-wrap{padding-left:14px;padding-right:14px}
   .header-inner{padding:0 14px}
-  .filters{grid-template-columns:1fr}
+  .filters{grid-template-columns:1fr;overflow:visible}
   .filter-card{min-width:0}
   .export-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .modal-metrics{grid-template-columns:1fr 1fr}
 }
 @media(max-width:430px){
   .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -281,8 +314,8 @@ tbody tr:last-child td{border-bottom:0}
 <div class="import-bar-wrap">
   <div class="import-bar">
     <input type="file" id="fileInput" accept=".csv,.zip,.xlsx,.xls">
-    <button id="btnCarregar" type="button">📊 Carregar Base</button>
-    <button id="btnLimpar" type="button" class="secondary">🧹 Limpar</button>
+    <button id="btnCarregar" type="button">Carregar Base</button>
+    <button id="btnLimpar" type="button" class="secondary">Limpar</button>
   </div>
 </div>
 
@@ -304,17 +337,14 @@ tbody tr:last-child td{border-bottom:0}
 
   <div class="filters">
     <div class="filter-card">
-      <label>Técnico</label>
-      <select id="filtroTecnico"><option value="">Todos</option></select>
+      <select id="filtroTecnico" aria-label="Técnico"><option value="">Todos os técnicos</option></select>
     </div>
     <div class="filter-card">
-      <label>Node</label>
-      <select id="filtroNode"><option value="">Todos</option></select>
+      <select id="filtroNode" aria-label="Node"><option value="">Todos os nodes</option></select>
     </div>
     <div class="filter-card">
-      <label>Situação</label>
-      <select id="filtroStatus">
-        <option value="">Todos</option>
+      <select id="filtroStatus" aria-label="Situação">
+        <option value="">Todas as situações</option>
         <option value="revisita">Com revisita</option>
         <option value="acompanhamento">Em acompanhamento</option>
         <option value="tec1baixo">TEC1 30d abaixo de 96%</option>
@@ -322,8 +352,7 @@ tbody tr:last-child td{border-bottom:0}
       </select>
     </div>
     <div class="filter-card">
-      <label>Ações</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button id="btnAplicarFiltros" class="primary" type="button">Aplicar</button>
         <button id="btnLimparFiltros" class="secondary" type="button">Limpar</button>
       </div>
@@ -331,32 +360,26 @@ tbody tr:last-child td{border-bottom:0}
   </div>
 
   <div class="export-row">
-    <button id="btnExportPdf" class="success" type="button">📄 PDF</button>
-    <button id="btnExportImg" class="success" type="button">🖼️ Imagem</button>
-    <button id="btnSalvarHistorico" class="secondary" type="button">💾 Salvar</button>
+    <button id="btnSalvarHistorico" class="secondary" type="button">Salvar</button>
   </div>
 
   <!-- KPIs -->
   <section class="kpis">
     <div class="kpi-card">
-      <div class="kpi-label">Base Manutenção</div>
+      <div class="kpi-label">Total de Visitas Executadas</div>
       <div class="kpi-value" id="kpiBase">0</div>
-      <div class="kpi-sub">Linhas filtradas</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card clickable-card" id="cardTecnicos" role="button" tabindex="0">
       <div class="kpi-label">Técnicos</div>
       <div class="kpi-value" id="kpiTecnicos">0</div>
-      <div class="kpi-sub">LOGIN_TECNICO únicos</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Revisitas 10d</div>
-      <div class="kpi-value" id="kpiRev">0</div>
-      <div class="kpi-sub" id="kpiRevPct">0%</div>
+      <div class="kpi-label">Revisitas</div>
+      <div class="kpi-value" id="kpiRev">0%</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">TEC1 30d</div>
+      <div class="kpi-label">TEC1</div>
       <div class="kpi-value" id="kpiTec1">0%</div>
-      <div class="kpi-sub">Dentro do horário programado</div>
     </div>
   </section>
 
@@ -371,11 +394,11 @@ tbody tr:last-child td{border-bottom:0}
         <table>
           <thead>
             <tr>
-              <th>Técnico</th><th>Produção</th><th>Revisitas 10d</th><th>% Rev. 10d</th>
+              <th>Técnico</th><th>Contratos Executados</th><th>Produção</th><th>Revisitas 10d</th><th>% Rev. 10d</th>
               <th>VT p/ Meta Rev.</th><th>Fora Janela 30d</th><th>TEC1 30d</th><th>VT p/ Meta TEC1</th><th>Situação</th>
             </tr>
           </thead>
-          <tbody id="tabelaTecnicos"><tr><td colspan="9"><div class="empty">Carregue a base para visualizar.</div></td></tr></tbody>
+          <tbody id="tabelaTecnicos"><tr><td colspan="10"><div class="empty">Carregue a base para visualizar.</div></td></tr></tbody>
         </table>
       </div>
       <div id="cardsTecnicosMobile" class="mobile-tech-cards"><div class="empty">Carregue a base para visualizar.</div></div>
@@ -416,8 +439,8 @@ tbody tr:last-child td{border-bottom:0}
     </div>
   </section>
 
-  <!-- RANKINGS NODE + REVISITA -->
-  <section class="grid2">
+  <!-- RANKING NODE -->
+  <section class="grid" id="secRankingNode" style="display:none">
     <div class="card">
       <div class="section-title-line">
         <h2>Ranking NODE</h2>
@@ -425,26 +448,19 @@ tbody tr:last-child td{border-bottom:0}
       </div>
       <div id="rankingNode"><div class="empty">Aguardando base.</div></div>
     </div>
-    <div class="card">
-      <div class="section-title-line">
-        <h2>Ranking Revisita 10d</h2>
-        <span class="section-caption">Maior percentual</span>
-      </div>
-      <div id="rankingRevisita"><div class="empty">Aguardando base.</div></div>
-    </div>
   </section>
 
   <!-- CONTRATOS COM REVISITA -->
   <section class="grid" id="secContratosRevisita">
     <div class="card">
       <div class="section-title-line">
-        <h2>Contratos com Revisita 10d</h2>
+        <h2>Contratos com Revisita</h2>
         <span class="section-caption">Agrupado por técnico</span>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Contrato</th><th>Técnico</th><th>QT Revisita 10d</th><th>Tipo Serviço</th><th>NODE</th></tr></thead>
-          <tbody id="tabelaRevisitas"><tr><td colspan="5"><div class="empty">Aguardando base.</div></td></tr></tbody>
+          <thead><tr><th>Contrato</th><th>Cód. 1ª VT</th><th>Data 1ª VT</th><th>Cód. Revisita</th><th>Data Revisita</th><th>QT Revisita</th><th>Tipo Serviço</th><th>NODE</th></tr></thead>
+          <tbody id="tabelaRevisitas"><tr><td colspan="8"><div class="empty">Aguardando base.</div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -481,8 +497,8 @@ tbody tr:last-child td{border-bottom:0}
 <!-- HISTÓRICO -->
 <section id="historico" class="tab-panel">
   <div class="export-row">
-    <button id="btnCarregarUltima" class="primary" type="button">🔁 Carregar última base salva</button>
-    <button id="btnLimparHistorico" class="danger" type="button">🗑️ Limpar histórico</button>
+    <button id="btnCarregarUltima" class="primary" type="button">Carregar última base salva</button>
+    <button id="btnLimparHistorico" class="danger" type="button">Limpar histórico</button>
   </div>
   <div class="card">
     <h2>Histórico Local</h2>
@@ -500,6 +516,19 @@ tbody tr:last-child td{border-bottom:0}
 
 </div>
 
+<div class="fade-modal" id="modalTecnicos" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTecnicosTitulo">Técnicos</h2>
+        <div class="section-caption" id="modalTecnicosSub">Selecione um técnico para ver os indicadores individuais.</div>
+      </div>
+      <button id="modalTecnicosFechar" class="secondary modal-close" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div id="modalTecnicosConteudo" class="tech-list-modal"></div>
+  </div>
+</div>
+
 <script>
 let arquivoSelecionado=null;
 let rawRows=[];
@@ -507,6 +536,7 @@ let processedRows=[];
 let currentSummary=null;
 let currentFileName="";
 let lastRenderRows=[];
+let modalTecnicosLista=[];
 
 const STORAGE_LAST="lumar_dashboard_last_dataset_v1";
 const STORAGE_HISTORY="lumar_dashboard_history_v1";
@@ -515,9 +545,110 @@ function $(id){return document.getElementById(id)}
 function setStatus(msg){const el=$("status"); if(el) el.innerHTML=msg}
 function norm(v){return String(v??"").replace(/^\uFEFF/,"").trim()}
 function head(v){return norm(v).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"_")}
-function pct(v){return (Number(v)||0).toFixed(1).replace(".",",")+"%"}
+function truncar(v,casas=1){
+  const n=Number(v)||0;
+  const fator=10**casas;
+  return Math.trunc(n*fator)/fator;
+}
+function pct(v){return truncar(v,1).toFixed(1).replace(".",",")+"%"}
+function num1(v){return truncar(v,1).toFixed(1).replace(".",",")}
 function getField(row,names){const wanted=names.map(head);for(const k of Object.keys(row)){if(wanted.includes(head(k)))return row[k]}return ""}
 function parseNumber(v){const s=norm(v).replace("%","").replace(",",".");const n=Number(s);return isNaN(n)?0:n}
+function formatarData(v){
+  const s=norm(v);
+  if(!s) return "";
+  if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s)) return s.split(" ")[0];
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){const [y,m,d]=s.slice(0,10).split("-");return `${d}/${m}/${y}`}
+  if(!isNaN(Number(s))&&Number(s)>20000){
+    const d=new Date(Math.round((Number(s)-25569)*86400*1000));
+    return isNaN(d.getTime())?s:d.toLocaleDateString("pt-BR");
+  }
+  return s;
+}
+function campoPrimeiroValor(row,grupos){
+  for(const grupo of grupos){const v=norm(getField(row,grupo));if(v)return v}
+  return "";
+}
+function valoresLista(v){
+  const s=norm(v).replace(/^\[|\]$/g,"").replace(/^"|"$/g,"");
+  if(!s) return [];
+  return s.split(/\s*(?:;|\||,|\r?\n)\s*/).map(item=>norm(item).replace(/^['"]|['"]$/g,"")).filter(Boolean);
+}
+function dataParaOrdem(data){
+  const s=norm(data);
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(m){const y=Number(m[3].length===2?`20${m[3]}`:m[3]);return new Date(y,Number(m[2])-1,Number(m[1])).getTime()}
+  m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return new Date(Number(m[1]),Number(m[2])-1,Number(m[3])).getTime();
+  return 0;
+}
+function codigosBaixa(row){
+  return valoresLista(getField(row,["LISTA_CD_BAIXA","LISTA CD BAIXA"]));
+}
+function datasAgenda(row){
+  return valoresLista(getField(row,["DATA_AGENDA","DATA AGENDA"])).map(formatarData).filter(Boolean);
+}
+function entradasAtendimento(row){
+  const codigos=codigosBaixa(row);
+  const datas=datasAgenda(row);
+  const max=Math.max(codigos.length,datas.length,1);
+  const entradas=[];
+  for(let i=0;i<max;i++){
+    const codigo=codigos[i]||codigos[0]||"";
+    const data=datas[i]||datas[0]||"";
+    if(codigo||data) entradas.push({codigo,data,ordem:dataParaOrdem(data)});
+  }
+  return entradas;
+}
+function montarHistoricoContratos(baseRows){
+  const mapa={};
+  baseRows.forEach(row=>{
+    const contrato=norm(getField(row,["CONTRATO"]));
+    if(!contrato) return;
+    entradasAtendimento(row).forEach(e=>{
+      const chave=`${e.codigo}|${e.data}`;
+      if(!mapa[contrato]) mapa[contrato]=[];
+      if(!mapa[contrato].some(item=>`${item.codigo}|${item.data}`===chave)) mapa[contrato].push(e);
+    });
+  });
+  Object.values(mapa).forEach(lista=>lista.sort((a,b)=>(a.ordem||0)-(b.ordem||0)||String(a.codigo).localeCompare(String(b.codigo))));
+  return mapa;
+}
+function dadosRevisita(row,contrato,historicoContratos){
+  const codigosBaixa=valoresLista(getField(row,["LISTA_CD_BAIXA","LISTA CD BAIXA"]));
+  const datasAgenda=valoresLista(getField(row,["DATA_AGENDA","DATA AGENDA"])).map(formatarData);
+  const historico=historicoContratos?.[contrato]||[];
+  const primeiro=historico[0]||null;
+  const ultimo=historico[historico.length-1]||null;
+  const historicoDistinto=primeiro&&ultimo&&(`${primeiro.codigo}|${primeiro.data}`!==`${ultimo.codigo}|${ultimo.data}`);
+  const codigoPrimeiraFallback=campoPrimeiroValor(row,[
+    ["CODIGO_PRIMEIRA_VT","CODIGO PRIMEIRA VT","COD_PRIMEIRA_VT","COD PRIMEIRA VT","CD_PRIMEIRA_VT","ID_PRIMEIRA_VT"],
+    ["OS_PRIMEIRA_VT","OS PRIMEIRA VT","ORDEM_PRIMEIRA_VT","ORDEM PRIMEIRA VT","CODIGO_OS_ORIGEM","CODIGO OS ORIGEM","NUM_OS_ORIGEM","NUM OS ORIGEM","OS_ORIGEM","OS ORIGEM"]
+  ]);
+  const codigoRevisitaFallback=campoPrimeiroValor(row,[
+    ["CODIGO_REVISITA","CODIGO REVISITA","COD_REVISITA","COD REVISITA","CD_REVISITA","ID_REVISITA"],
+    ["OS_REVISITA","OS REVISITA","ORDEM_REVISITA","ORDEM REVISITA","CODIGO_OS_REVISITA","CODIGO OS REVISITA","NUM_OS_REVISITA","NUM OS REVISITA"],
+    ["CODIGO_OS","CODIGO OS","NUM_OS","NUM OS","NUMERO_OS","NUMERO OS","ORDEM_SERVICO","ORDEM SERVICO","ID_OS"]
+  ]);
+  const dataPrimeiraFallback=formatarData(campoPrimeiroValor(row,[
+    ["DATA_PRIMEIRA_VT","DATA PRIMEIRA VT","DT_PRIMEIRA_VT","DT PRIMEIRA VT","DATA_VT_ORIGEM","DATA VT ORIGEM"],
+    ["DATA_ATENDIMENTO_ORIGEM","DATA ATENDIMENTO ORIGEM","DT_ATENDIMENTO_ORIGEM","DT ATENDIMENTO ORIGEM","DATA_ABERTURA_ORIGEM","DATA ABERTURA ORIGEM"]
+  ]));
+  const dataRevisitaFallback=formatarData(campoPrimeiroValor(row,[
+    ["DATA_REVISITA","DATA REVISITA","DT_REVISITA","DT REVISITA","DATA_ATENDIMENTO_REVISITA","DATA ATENDIMENTO REVISITA"],
+    ["DATA_ATENDIMENTO","DATA ATENDIMENTO","DT_ATENDIMENTO","DT ATENDIMENTO","DATA_BAIXA","DATA BAIXA","DT_BAIXA","DT BAIXA","DATA_FECHAMENTO","DATA FECHAMENTO"]
+  ]));
+  return {
+    codigoPrimeira:historicoDistinto?primeiro.codigo:codigoPrimeiraFallback,
+    dataPrimeira:historicoDistinto?primeiro.data:dataPrimeiraFallback,
+    codigoRevisita:ultimo?.codigo||codigosBaixa[codigosBaixa.length-1]||codigoRevisitaFallback,
+    dataRevisita:ultimo?.data||datasAgenda[datasAgenda.length-1]||dataRevisitaFallback
+  };
+}
+function dataAgendaPrincipal(row){
+  const datas=datasAgenda(row);
+  return datas[0]||formatarData(getField(row,["DATA_AGENDA","DATA AGENDA"]));
+}
 
 const TECNICOS_NOMES={
   "Z132322":"Apolinario",
@@ -647,19 +778,22 @@ function preencherFiltros(rows){
     .sort((a,b)=>ordemLoginIndex(a)-ordemLoginIndex(b)||nomeTecnico(a).localeCompare(nomeTecnico(b)));
   const nodes=[...new Set(rows.map(r=>norm(getField(r,["NODE"]))).filter(Boolean))].sort();
   const ft=$("filtroTecnico");const fn=$("filtroNode");
-  if(ft) ft.innerHTML='<option value="">Todos</option>'+tecnicos.map(t=>`<option value="${t}">${rotuloTecnico(t)}</option>`).join("");
-  if(fn) fn.innerHTML='<option value="">Todos</option>'+nodes.map(n=>`<option value="${n}">${n}</option>`).join("");
+  if(ft) ft.innerHTML='<option value="">Todos os técnicos</option>'+tecnicos.map(t=>`<option value="${t}">${rotuloTecnico(t)}</option>`).join("");
+  if(fn) fn.innerHTML='<option value="">Todos os nodes</option>'+nodes.map(n=>`<option value="${n}">${n}</option>`).join("");
 }
 
 function processarResumo(rows){
   const tec={},nodes={},revisitas=[];
+  const historicoContratos=montarHistoricoContratos(processedRows.length?processedRows:rows);
   rows.forEach(r=>{
     const login=loginKey(getField(r,["LOGIN_TECNICO","LOGIN TECNICO","TECNICO"]))||"SEM_LOGIN";
     const contrato=norm(getField(r,["CONTRATO"]));
     const node=norm(getField(r,["NODE"]))||"SEM_NODE";
     if(!contrato) return;
-    if(!tec[login]) tec[login]={login,nome:nomeTecnico(login),producao:0,revisitas:0,total:0,tecOk:0,tecFora:0,tecBase:0};
+    if(!tec[login]) tec[login]={login,nome:nomeTecnico(login),producao:0,revisitas:0,total:0,tecOk:0,tecFora:0,tecBase:0,dias:new Set()};
     tec[login].total++;
+    const diaAgenda=dataAgendaPrincipal(r);
+    if(diaAgenda) tec[login].dias.add(diaAgenda);
     nodes[node]=(nodes[node]||0)+1;
     if(ehProducao(r)) tec[login].producao++;
     const tecNum=parseNumber(getField(r,["TOTAL_OS_TEC1_PADRAO","TOTAL OS TEC1 PADRAO"]));
@@ -667,12 +801,15 @@ function processarResumo(rows){
     if(tecDen>0){tec[login].tecOk+=tecNum;tec[login].tecBase+=tecDen;tec[login].tecFora+=Math.max(0,tecDen-tecNum);}
     if(ehRevisita(r)){
       tec[login].revisitas++;
-      revisitas.push({contrato,login,nome:nomeTecnico(login),node,qt:parseNumber(getField(r,["QT_REVISITA","QT REVISITA"])),tipo:norm(getField(r,["TIPO_SERVICO","TIPO SERVICO","TIPO_OS","TIPO OS"]))});
+      revisitas.push({contrato,login,nome:nomeTecnico(login),node,qt:parseNumber(getField(r,["QT_REVISITA","QT REVISITA"])),tipo:norm(getField(r,["TIPO_SERVICO","TIPO SERVICO","TIPO_OS","TIPO OS"])),...dadosRevisita(r,contrato,historicoContratos)});
     }
   });
 
   let arr=Object.values(tec).map(t=>{
-    const resumo={...t,revPct:t.total?t.revisitas/t.total*100:0,tec1Pct:t.tecBase?t.tecOk/t.tecBase*100:0};
+    const diasAtendimento=t.dias?.size||0;
+    const contratosExecutados=t.total;
+    const resumo={...t,contratosExecutados,diasAtendimento,mediaContratos:diasAtendimento?contratosExecutados/diasAtendimento:contratosExecutados,revPct:t.total?t.revisitas/t.total*100:0,tec1Pct:t.tecBase?t.tecOk/t.tecBase*100:0};
+    delete resumo.dias;
     resumo.vtMetaRevisita=vtParaMetaRevisita(resumo);
     resumo.vtMetaTec1=vtParaMetaTec1(resumo);
     return resumo;
@@ -704,6 +841,16 @@ function resumoSituacaoTecnico(t){
   if((Number(t.tec1Pct)||0)<LIMITE_ACOMP_TEC1) problemas.push(`TEC1 ${pct(t.tec1Pct)}`);
   return problemas.length?problemas.join(" · "):"Dentro da meta";
 }
+function detalheAcompanhamento(t){
+  const itens=[];
+  if((Number(t.revPct)||0)>LIMITE_ACOMP_REVISITA){
+    itens.push(`Tipo: Revisita | Para: reduzir para até ${pct(LIMITE_ACOMP_REVISITA)} e executar ${t.vtMetaRevisita||0} VT sem retorno`);
+  }
+  if((Number(t.tec1Pct)||0)<LIMITE_ACOMP_TEC1){
+    itens.push(`Tipo: TEC1 | Para: chegar a ${pct(LIMITE_ACOMP_TEC1)} dentro da janela${t.vtMetaTec1?` com ${t.vtMetaTec1} VT no padrão`:""}`);
+  }
+  return itens.join("<br>");
+}
 
 function renderRankingOperacional(summary){
   const {arr}=summary;
@@ -713,7 +860,7 @@ function renderRankingOperacional(summary){
   const melhores=[...arr].filter(t=>t.producao>0).sort((a,b)=>a.revPct-b.revPct||b.tec1Pct-a.tec1Pct||b.producao-a.producao).slice(0,5);
   ranking.innerHTML=melhores.length?melhores.map((t,i)=>`<div class="rank-item">
     <div class="rank-pos">${i+1}</div>
-    <div class="rank-main"><div class="rank-title">${t.nome}</div><div class="rank-sub">${t.producao} produção · ${t.revisitas} revisitas 10d · ${t.tecFora} fora janela</div></div>
+    <div class="rank-main"><div class="rank-title">${t.nome}</div><div class="rank-sub">${t.contratosExecutados} contratos executados · média ${num1(t.mediaContratos)}/dia · ${t.revisitas} revisitas 10d</div></div>
     <div class="rank-score good">${pct(t.revPct)} Rev<br>${pct(t.tec1Pct)} TEC1</div>
   </div>`).join(""):'<div class="empty">Sem dados.</div>';
 
@@ -721,8 +868,8 @@ function renderRankingOperacional(summary){
     .sort((a,b)=>{const pa=(a.revPct>LIMITE_ACOMP_REVISITA?1:0)+(a.tec1Pct<LIMITE_ACOMP_TEC1?1:0);const pb=(b.revPct>LIMITE_ACOMP_REVISITA?1:0)+(b.tec1Pct<LIMITE_ACOMP_TEC1?1:0);return pb-pa||b.revPct-a.revPct||a.tec1Pct-b.tec1Pct;}).slice(0,8);
   acompanhamentoEl.innerHTML=acomp.length?acomp.map((t,i)=>`<div class="rank-item">
     <div class="rank-pos">${i+1}</div>
-    <div class="rank-main"><div class="rank-title">${t.nome}</div><div class="rank-sub">${resumoSituacaoTecnico(t)}</div></div>
-    <div class="rank-score warn">${t.vtMetaRevisita?`${t.vtMetaRevisita} VT Rev`:""}</div>
+    <div class="rank-main"><div class="rank-title">${t.nome}</div><div class="rank-sub">${detalheAcompanhamento(t)}</div></div>
+    <div class="rank-score warn">${resumoSituacaoTecnico(t).replace(" · ","<br>")}</div>
   </div>`).join(""):'<div class="alert greenline">✅ Nenhum técnico em acompanhamento no filtro atual.</div>';
 }
 
@@ -732,7 +879,8 @@ function renderCardsMobile(summary){
   el.innerHTML=arr.length?arr.map(t=>{const [lab,cor]=statusTecnico(t);return `<div class="tech-mobile-card">
     <div class="tech-mobile-head"><div>${celulaTecnico(t.login)}</div><span class="badge ${cor}">${lab}</span></div>
     <div class="mobile-metrics">
-      <div class="metric-box"><span>Produção</span><strong>${t.producao}</strong></div>
+      <div class="metric-box"><span>Contratos executados</span><strong>${t.contratosExecutados}</strong></div>
+      <div class="metric-box"><span>Produção</span><strong>${num1(t.mediaContratos)} média/dia</strong></div>
       <div class="metric-box"><span>Revisita 10d</span><strong>${pct(t.revPct)}</strong></div>
       <div class="metric-box"><span>TEC1 30d</span><strong>${pct(t.tec1Pct)}</strong></div>
       <div class="metric-box"><span>Fora janela</span><strong>${t.tecFora}</strong></div>
@@ -776,32 +924,34 @@ function renderDashboard(summary){
 
   if($("kpiBase")) $("kpiBase").textContent=baseLen;
   if($("kpiTecnicos")) $("kpiTecnicos").textContent=arr.length;
-  if($("kpiRev")) $("kpiRev").textContent=totalRev;
-  if($("kpiRevPct")) $("kpiRevPct").textContent=pct(baseLen?totalRev/baseLen*100:0);
+  const mediaRev=baseLen?totalRev/baseLen*100:0;
+  if($("kpiRev")) $("kpiRev").textContent=pct(mediaRev);
   if($("kpiTec1")) $("kpiTec1").textContent=pct(totalTecBase?totalOk/totalTecBase*100:0);
 
   $("tabelaTecnicos").innerHTML=arr.length?arr.map(t=>{const [lab,cor]=statusTecnico(t);return `<tr>
     <td>${celulaTecnico(t.login)}</td>
-    <td>${t.producao}</td><td>${t.revisitas}</td><td>${pct(t.revPct)}</td>
+    <td>${t.contratosExecutados}</td><td>${num1(t.mediaContratos)}</td><td>${t.revisitas}</td><td>${pct(t.revPct)}</td>
     <td>${celulaMetaRevisitaVT(t.vtMetaRevisita)}</td>
     <td>${t.tecFora}</td><td>${pct(t.tec1Pct)}</td>
     <td>${celulaMetaVT(t.vtMetaTec1)}</td>
     <td><span class="badge ${cor}">${lab}</span></td>
-  </tr>`}).join(""):'<tr><td colspan="9"><div class="empty">Sem dados para os filtros selecionados.</div></td></tr>';
+  </tr>`}).join(""):'<tr><td colspan="10"><div class="empty">Sem dados para os filtros selecionados.</div></td></tr>';
 
-  renderBars("rankingNode",arrNode,"node","qtd","n");
-  renderBars("rankingRevisita",[...arr].sort((a,b)=>b.revPct-a.revPct),"nome","revPct","%");
+  const secRankingNode=$("secRankingNode");
+  const nodeFiltrado=$("filtroNode")?.value||"";
+  if(secRankingNode) secRankingNode.style.display=nodeFiltrado?"":"none";
+  if(nodeFiltrado) renderBars("rankingNode",arrNode,"node","qtd","n");
 
   if(revisitas.length){
     const ordenadas=[...revisitas].sort((a,b)=>ordemLoginIndex(a.login)-ordemLoginIndex(b.login)||String(a.login).localeCompare(String(b.login))||String(a.contrato).localeCompare(String(b.contrato)));
     let atual="";
     $("tabelaRevisitas").innerHTML=ordenadas.map(r=>{
       const abre=r.login!==atual;atual=r.login;
-      return `${abre?`<tr class="group-row"><td colspan="5"><span>${nomeTecnico(r.login)}${TECNICOS_NOMES[loginKey(r.login)]?` <small>(${loginKey(r.login)})</small>`:""}</span></td></tr>`:""}
-      <tr><td>${r.contrato}</td><td>${celulaTecnico(r.login)}</td><td>${r.qt}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
+      return `${abre?`<tr class="group-row"><td colspan="8"><span>${nomeTecnico(r.login)}${TECNICOS_NOMES[loginKey(r.login)]?` <small>(${loginKey(r.login)})</small>`:""}</span></td></tr>`:""}
+      <tr><td>${r.contrato}</td><td>${r.codigoPrimeira||"-"}</td><td>${r.dataPrimeira||"-"}</td><td>${r.codigoRevisita||"-"}</td><td>${r.dataRevisita||"-"}</td><td>${r.qt}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
     }).join("");
   }else{
-    $("tabelaRevisitas").innerHTML='<tr><td colspan="5"><div class="empty">Nenhuma revisita encontrada.</div></td></tr>';
+    $("tabelaRevisitas").innerHTML='<tr><td colspan="8"><div class="empty">Nenhuma revisita encontrada.</div></td></tr>';
   }
 
   renderRankingOperacional(summary);
@@ -838,6 +988,65 @@ function renderPlanoAcao(summary){
   if(baixoVolume) itens.push(`<div class="alert blueline"><strong>4. Produção:</strong> conferir distribuição de carga; menor produção atual: <strong>${baixoVolume.nome}</strong> com ${baixoVolume.producao}.</div>`);
   itens.push(`<div class="alert greenline"><strong>5. Rotina:</strong> manter acompanhamento diário de produção, revisita 10d, TEC1 30d e nodes.</div>`);
   $("planoAcao").innerHTML=itens.join("");
+}
+
+function abrirModalTecnicos(atualizarLista=true){
+  const modal=$("modalTecnicos");
+  const conteudo=$("modalTecnicosConteudo");
+  if(!modal||!conteudo) return;
+  $("modalTecnicosTitulo").textContent="Técnicos";
+  $("modalTecnicosSub").textContent="Selecione um técnico para ver os indicadores individuais.";
+  conteudo.className="tech-list-modal";
+  if(atualizarLista) modalTecnicosLista=[...(currentSummary?.arr||[])];
+  const arr=modalTecnicosLista;
+  if(!arr.length){
+    conteudo.innerHTML='<div class="empty">Carregue uma base para listar os técnicos.</div>';
+  }else{
+    conteudo.innerHTML=arr.map(t=>`<button class="secondary tech-modal-btn" type="button" data-login="${t.login}">
+      <span>${t.nome}</span><strong>${t.contratosExecutados} VT</strong>
+    </button>`).join("");
+    conteudo.querySelectorAll("[data-login]").forEach(btn=>btn.addEventListener("click",()=>abrirIndicadoresTecnico(btn.dataset.login)));
+  }
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden","false");
+}
+function fecharModalTecnicos(){
+  const modal=$("modalTecnicos");
+  if(!modal) return;
+  modal.classList.remove("active");
+  modal.setAttribute("aria-hidden","true");
+}
+function aplicarTecnicoNoDashboard(login){
+  if($("filtroTecnico")) $("filtroTecnico").value=login||"";
+  const filtrado=aplicarFiltros(processedRows);
+  lastRenderRows=filtrado;
+  renderDashboard(processarResumo(filtrado));
+}
+function abrirIndicadoresTecnico(login){
+  aplicarTecnicoNoDashboard(login);
+  const t=currentSummary?.arr?.find(item=>item.login===login);
+  if(!t) return;
+  $("modalTecnicosTitulo").textContent=t.nome;
+  $("modalTecnicosSub").textContent=`Indicadores individuais ${TECNICOS_NOMES[loginKey(login)]?`· ${loginKey(login)}`:""}`;
+  const conteudo=$("modalTecnicosConteudo");
+  conteudo.className="";
+  const [situacao,cor]=statusTecnico(t);
+  conteudo.innerHTML=`<div class="modal-metrics">
+    <div class="metric-box"><span>Contratos executados</span><strong>${t.contratosExecutados}</strong></div>
+    <div class="metric-box"><span>Produção</span><strong>${num1(t.mediaContratos)} média/dia</strong></div>
+    <div class="metric-box"><span>Revisitas</span><strong>${t.revisitas} · ${pct(t.revPct)}</strong></div>
+    <div class="metric-box"><span>TEC1</span><strong>${pct(t.tec1Pct)}</strong></div>
+    <div class="metric-box"><span>Fora janela</span><strong>${t.tecFora}</strong></div>
+    <div class="metric-box"><span>Situação</span><strong><span class="badge ${cor}">${situacao}</span></strong></div>
+  </div>
+  <div class="modal-actions">
+    <button class="secondary" type="button" id="btnModalVoltar">Voltar</button>
+    <button class="success" type="button" id="btnModalPdf">PDF</button>
+    <button class="success" type="button" id="btnModalImagem">Imagem</button>
+  </div>`;
+  $("btnModalVoltar").addEventListener("click",()=>abrirModalTecnicos(false));
+  $("btnModalPdf").addEventListener("click",exportarPDF);
+  $("btnModalImagem").addEventListener("click",exportarImagem);
 }
 
 function filtrarBasePrincipal(rows){
@@ -922,15 +1131,16 @@ function limparFiltros(){
 function limparTudo(){
   arquivoSelecionado=null;$("fileInput").value="";rawRows=[];processedRows=[];currentSummary=null;currentFileName="";
   setStatus("Nenhuma base carregada.");
-  ["kpiBase","kpiTecnicos","kpiRev"].forEach(id=>{if($(id)) $(id).textContent="0";});
-  if($("kpiRevPct")) $("kpiRevPct").textContent="0%";if($("kpiTec1")) $("kpiTec1").textContent="0%";
-  $("tabelaTecnicos").innerHTML='<tr><td colspan="9"><div class="empty">Carregue a base para visualizar.</div></td></tr>';
-  $("rankingNode").innerHTML='<div class="empty">Aguardando base.</div>';
-  $("rankingRevisita").innerHTML='<div class="empty">Aguardando base.</div>';
+  ["kpiBase","kpiTecnicos"].forEach(id=>{if($(id)) $(id).textContent="0";});
+  if($("kpiRev")) $("kpiRev").textContent="0%";
+  if($("kpiTec1")) $("kpiTec1").textContent="0%";
+  $("tabelaTecnicos").innerHTML='<tr><td colspan="10"><div class="empty">Carregue a base para visualizar.</div></td></tr>';
+  if($("secRankingNode")) $("secRankingNode").style.display="none";
+  if($("rankingNode")) $("rankingNode").innerHTML='<div class="empty">Aguardando base.</div>';
   if($("rankingOperacional")) $("rankingOperacional").innerHTML='<div class="empty">Aguardando base.</div>';
   if($("rankingAcompanhamento")) $("rankingAcompanhamento").innerHTML='<div class="empty">Aguardando base.</div>';
   if($("cardsTecnicosMobile")) $("cardsTecnicosMobile").innerHTML='<div class="empty">Carregue a base para visualizar.</div>';
-  $("tabelaRevisitas").innerHTML='<tr><td colspan="5"><div class="empty">Aguardando base.</div></td></tr>';
+  $("tabelaRevisitas").innerHTML='<tr><td colspan="8"><div class="empty">Aguardando base.</div></td></tr>';
   $("alertasResumo").innerHTML='<div class="empty">Carregue uma base.</div>';
   $("maiorAtencao").textContent="Aguardando dados.";$("destaquePositivo").textContent="Aguardando dados.";
   $("planoAcao").innerHTML='<div class="empty">Carregue uma base para gerar recomendações.</div>';
@@ -964,12 +1174,17 @@ function criarAreaExportacao(){
   const revPct=resumo.baseLen?resumo.totalRev/resumo.baseLen*100:0;
   const tec1Pct=resumo.totalTecBase?resumo.totalOk/resumo.totalTecBase*100:0;
   shell.innerHTML=`<div class="export-report-header">
-    <div><h1>Relatório de Manutenção</h1><p>Performance por Técnico e Contratos com Revisita 10d</p></div>
-    <div style="text-align:right;font-size:12px;font-weight:700;line-height:1.55;color:rgba(255,255,255,.75)">Técnico: ${info.tecnico}<br>Node: ${info.node}<br>Gerado em: ${info.data}</div>
+    <div><h1>Relatório de Manutenção</h1><p>Performance por Técnico e Contratos com Revisita</p></div>
+    <div style="text-align:right;font-size:12px;font-weight:700;line-height:1.55;color:rgba(255,255,255,.86)">Gerado em<br>${info.data}</div>
+  </div>
+  <div class="export-filter-line">
+    <div class="export-filter-pill">Técnico: ${info.tecnico}</div>
+    <div class="export-filter-pill">Node: ${info.node}</div>
+    <div class="export-filter-pill">Situação: ${info.status}</div>
   </div>
   <div class="export-summary-grid">
-    <div class="exec-chip"><div class="exec-label">Revisita 10d</div><div class="exec-value">${pct(revPct)}</div></div>
-    <div class="exec-chip"><div class="exec-label">TEC1 30d</div><div class="exec-value">${pct(tec1Pct)}</div></div>
+    <div class="exec-chip"><div class="exec-label">Revisitas</div><div class="exec-value">${pct(revPct)}</div></div>
+    <div class="exec-chip"><div class="exec-label">TEC1</div><div class="exec-value">${pct(tec1Pct)}</div></div>
   </div>`;
   shell.appendChild(performance.cloneNode(true));
   shell.appendChild(contratos.cloneNode(true));
@@ -1010,11 +1225,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("fileInput").addEventListener("change",e=>{arquivoSelecionado=e.target.files[0]||null;if(arquivoSelecionado)setStatus("📁 Arquivo selecionado: <strong>"+arquivoSelecionado.name+"</strong>. Clique em <strong>Carregar Base</strong>.");});
   $("btnAplicarFiltros").addEventListener("click",reaplicarFiltros);
   $("btnLimparFiltros").addEventListener("click",limparFiltros);
-  $("btnExportImg").addEventListener("click",exportarImagem);
-  $("btnExportPdf").addEventListener("click",exportarPDF);
   $("btnSalvarHistorico").addEventListener("click",salvarHistorico);
   $("btnCarregarUltima").addEventListener("click",carregarUltimaBase);
   $("btnLimparHistorico").addEventListener("click",()=>{localStorage.removeItem(STORAGE_HISTORY);renderHistorico();setStatus("🗑️ Histórico local limpo.");});
+  $("cardTecnicos").addEventListener("click",abrirModalTecnicos);
+  $("cardTecnicos").addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();abrirModalTecnicos();}});
+  $("modalTecnicosFechar").addEventListener("click",fecharModalTecnicos);
+  $("modalTecnicos").addEventListener("click",e=>{if(e.target===$("modalTecnicos")) fecharModalTecnicos();});
   document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.addEventListener("click",()=>{
       document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
