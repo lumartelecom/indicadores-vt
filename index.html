@@ -269,7 +269,9 @@ tbody tr:last-child td{border-bottom:0}
 /* ─── MODAL DA BASE COMPLETA ─── */
 #modalIndicadorDetalhe .modal-card{width:min(1120px,100%)}
 .base-total-resumo{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.base-total-chip{background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800;color:var(--navy2)}
+.base-total-chip{background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800;color:var(--navy2);cursor:pointer;transition:.18s ease;display:inline-flex;align-items:center;justify-content:center}
+.base-total-chip:hover{background:#eef5ff;border-color:#b8cdea}
+.base-total-chip.active{background:linear-gradient(135deg,#17375f,#1e5fb8);border-color:#17375f;color:#fff;box-shadow:0 8px 18px rgba(23,55,95,.16)}
 .base-total-table .table-wrap{max-height:62vh;overflow:auto}
 .base-total-table table{min-width:920px;font-size:12px}
 .base-total-table th{font-size:9px;padding:9px 8px}
@@ -277,6 +279,16 @@ tbody tr:last-child td{border-bottom:0}
 .indicador-tags{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .indicador-tags .action-pill{font-size:9px;padding:3px 7px}
 
+
+
+/* ─── BUSCA NOS MODAIS REVISITA / TEC1 ─── */
+.modal-indicador-search{display:flex;gap:8px;align-items:center;justify-content:flex-start;margin:0 0 12px;flex-wrap:wrap}
+.modal-indicador-search input{width:230px;max-width:100%;border:1px solid var(--border-strong);border-radius:9px;padding:8px 11px;font-size:13px;font-family:inherit;background:#fff;color:var(--text);outline:none}
+.modal-indicador-search input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(21,95,196,.11)}
+.modal-indicador-search button{min-height:34px;padding:7px 12px}
+.modal-indicador-search-info{font-size:11px;font-weight:800;color:var(--text-muted);margin:-2px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+tr.contrato-modal-encontrado td{background:#fff2b8!important;box-shadow:inset 4px 0 0 #d97706}
+@media(max-width:620px){.modal-indicador-search input{width:100%}.modal-indicador-search button{flex:1;justify-content:center}}
 
 /* ─── BUSCA DE CONTRATO NO MODAL ─── */
 .base-total-search{display:flex;gap:8px;align-items:center;justify-content:flex-start;margin:0 0 10px;flex-wrap:wrap}
@@ -1220,8 +1232,9 @@ function renderDashboard(summary){
     let atual="";
     $("tabelaRevisitas").innerHTML=ordenadas.map(r=>{
       const abre=r.login!==atual;atual=r.login;
+      const contratoBusca=String(r.contrato||"").replace(/[^0-9a-zA-Z]/g,"").toLowerCase();
       return `${abre?`<tr class="group-row"><td colspan="8"><span>${nomeTecnico(r.login)}${TECNICOS_NOMES[loginKey(r.login)]?` <small>(${loginKey(r.login)})</small>`:""}</span></td></tr>`:""}
-      <tr><td>${r.contrato}</td><td>${r.codigoPrimeira||"-"}</td><td>${r.dataPrimeira||"-"}</td><td>${r.codigoRevisita||"-"}</td><td>${r.dataRevisita||"-"}</td><td>${r.qt}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
+      <tr data-contrato="${contratoBusca}" data-contrato-label="${r.contrato}"><td>${r.contrato}</td><td>${r.codigoPrimeira||"-"}</td><td>${r.dataPrimeira||"-"}</td><td>${r.codigoRevisita||"-"}</td><td>${r.dataRevisita||"-"}</td><td>${r.qt}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
     }).join("");
   }else{
     $("tabelaRevisitas").innerHTML='<tr><td colspan="8"><div class="empty">Nenhuma revisita encontrada.</div></td></tr>';
@@ -1234,8 +1247,9 @@ function renderDashboard(summary){
       let atualTec1="";
       $("tabelaTec1Fora").innerHTML=ordenadas.map(r=>{
         const abre=r.login!==atualTec1;atualTec1=r.login;
+        const contratoBusca=String(r.contrato||"").replace(/[^0-9a-zA-Z]/g,"").toLowerCase();
         return `${abre?`<tr class="group-row"><td colspan="9"><span>${nomeTecnico(r.login)}${TECNICOS_NOMES[loginKey(r.login)]?` <small>(${loginKey(r.login)})</small>`:""}</span></td></tr>`:""}
-        <tr><td>${r.contrato}</td><td>${r.codigo||"-"}</td><td>${r.data||"-"}</td><td><span class="meta-vt need">${r.fora}</span></td><td>${r.padrao}</td><td>${pct(r.tec1Pct)}</td><td>${celulaMetaVT(metaTec1PorLogin[loginKey(r.login)]||0)}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
+        <tr data-contrato="${contratoBusca}" data-contrato-label="${r.contrato}"><td>${r.contrato}</td><td>${r.codigo||"-"}</td><td>${r.data||"-"}</td><td><span class="meta-vt need">${r.fora}</span></td><td>${r.padrao}</td><td>${pct(r.tec1Pct)}</td><td>${celulaMetaVT(metaTec1PorLogin[loginKey(r.login)]||0)}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
       }).join("");
     }else{
       $("tabelaTec1Fora").innerHTML='<tr><td colspan="9"><div class="empty">Nenhum contrato TEC1 fora do padrão encontrado.</div></td></tr>';
@@ -1337,6 +1351,44 @@ function tagsIndicadoresBase(row){
   return tags.length?`<div class="indicador-tags">${tags.join("")}</div>`:'<div class="indicador-tags"><span class="action-pill ok">Dentro</span></div>';
 }
 
+
+function ativarFiltrosResumoBase(conteudo){
+  const chips=[...conteudo.querySelectorAll(".base-total-chip[data-filter]")];
+  const linhas=[...conteudo.querySelectorAll("tbody tr[data-contrato]")];
+  const resultadoBusca=$("resultadoBuscaContratoBase");
+  if(!chips.length||!linhas.length) return;
+
+  const aplicarFiltro=(filtro="total")=>{
+    chips.forEach(chip=>chip.classList.toggle("active", chip.dataset.filter===filtro));
+    let visiveis=0;
+    linhas.forEach(tr=>{
+      const rev=tr.dataset.revisita==="1";
+      const tec1=tr.dataset.tec1==="1";
+      const dentro=tr.dataset.dentro==="1";
+      const mostrar = (
+        filtro==="total" ? true :
+        filtro==="revisita" ? rev :
+        filtro==="tec1" ? tec1 :
+        filtro==="dentro" ? dentro :
+        true
+      );
+      tr.style.display = mostrar ? "" : "none";
+      if(mostrar) visiveis++;
+    });
+    conteudo.dataset.filtroAtual=filtro;
+    if(resultadoBusca){
+      const rotulo = filtro==="total" ? "Mostrando toda a base." :
+                     filtro==="revisita" ? "Mostrando apenas contratos com revisita." :
+                     filtro==="tec1" ? "Mostrando apenas contratos TEC1 fora do padrão." :
+                     "Mostrando apenas contratos dentro do padrão.";
+      resultadoBusca.textContent=`${rotulo} ${visiveis} registro(s).`;
+    }
+  };
+
+  chips.forEach(chip=>chip.addEventListener("click",()=>aplicarFiltro(chip.dataset.filter)));
+  aplicarFiltro("total");
+}
+
 function ativarBuscaContratoBase(conteudo){
   const inputBusca=$("buscaContratoBase");
   const btnPesquisar=$("pesquisarContratoBase");
@@ -1386,7 +1438,14 @@ function ativarBuscaContratoBase(conteudo){
       inputBusca.value="";
       limparDestaque();
       if(tableScroll) tableScroll.scrollTo({top:0,behavior:"smooth"});
-      if(resultadoBusca) resultadoBusca.textContent="Digite o contrato e clique em pesquisar.";
+      const filtroAtual=conteudo.dataset.filtroAtual||"total";
+      if(resultadoBusca){
+        const rotulo = filtroAtual==="total" ? "Mostrando toda a base." :
+                       filtroAtual==="revisita" ? "Mostrando apenas contratos com revisita." :
+                       filtroAtual==="tec1" ? "Mostrando apenas contratos TEC1 fora do padrão." :
+                       "Mostrando apenas contratos dentro do padrão.";
+        resultadoBusca.textContent=rotulo;
+      }
       inputBusca.focus();
     });
   }
@@ -1421,7 +1480,7 @@ function abrirModalBaseTotal(){
       if(foraTec1) totalTec1++;
       if(!rev&&!foraTec1) totalDentro++;
       const contratoBusca=String(norm(getField(r,["CONTRATO"]))||"").replace(/[^0-9a-zA-Z]/g,"").toLowerCase();
-      return `<tr data-contrato="${contratoBusca}" data-contrato-label="${contrato}">
+      return `<tr data-contrato="${contratoBusca}" data-contrato-label="${contrato}" data-revisita="${rev?1:0}" data-tec1="${foraTec1?1:0}" data-dentro="${(!rev&&!foraTec1)?1:0}">
         <td>${contrato}</td>
         <td>${data}</td>
         <td><strong class="tech-name">${tecnico}</strong>${loginTxt}</td>
@@ -1432,17 +1491,17 @@ function abrirModalBaseTotal(){
     }).join("");
     conteudo.innerHTML=`<div class="base-total-table">
       <div class="base-total-resumo">
-        <span class="base-total-chip">Total: ${rows.length}</span>
-        <span class="base-total-chip">Revisita: ${totalRevisita}</span>
-        <span class="base-total-chip">TEC1 fora: ${totalTec1}</span>
-        <span class="base-total-chip">Dentro: ${totalDentro}</span>
+        <button class="base-total-chip active" type="button" data-filter="total">Total: ${rows.length}</button>
+        <button class="base-total-chip" type="button" data-filter="revisita">Revisita: ${totalRevisita}</button>
+        <button class="base-total-chip" type="button" data-filter="tec1">TEC1 fora: ${totalTec1}</button>
+        <button class="base-total-chip" type="button" data-filter="dentro">Dentro: ${totalDentro}</button>
       </div>
       <div class="base-total-search">
         <input id="buscaContratoBase" type="search" placeholder="Digite o contrato..." autocomplete="off">
         <button class="primary" type="button" id="pesquisarContratoBase">Pesquisar</button>
         <button class="secondary" type="button" id="limparBuscaContratoBase">Limpar</button>
       </div>
-      <div class="base-total-search-info" id="resultadoBuscaContratoBase">Digite o contrato e clique em pesquisar.</div>
+      <div class="base-total-search-info" id="resultadoBuscaContratoBase">Mostrando toda a base.</div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Contrato</th><th>Data Atendimento</th><th>Técnico</th><th>Código Baixado</th><th>NODE</th><th>Indicador</th></tr></thead>
@@ -1450,6 +1509,7 @@ function abrirModalBaseTotal(){
         </table>
       </div>
     </div>`;
+    ativarFiltrosResumoBase(conteudo);
     ativarBuscaContratoBase(conteudo);
   }
   modal.classList.add("active");
@@ -1465,14 +1525,73 @@ function abrirModalIndicador(tipo){
     conteudo.innerHTML='<div class="empty">Não foi possível localizar o detalhamento.</div>';
   }else{
     const clone=origem.cloneNode(true);
-    conteudo.innerHTML="";
+    conteudo.innerHTML=`<div class="modal-indicador-search">
+        <input id="buscaContratoIndicador" type="search" placeholder="Digite o contrato..." autocomplete="off">
+        <button class="primary" type="button" id="pesquisarContratoIndicador">Pesquisar</button>
+        <button class="secondary" type="button" id="limparBuscaContratoIndicador">Limpar</button>
+      </div>
+      <div class="modal-indicador-search-info" id="resultadoBuscaContratoIndicador">Digite o contrato e clique em pesquisar.</div>`;
     conteudo.appendChild(clone);
+    ativarBuscaModalIndicador(conteudo);
   }
   $("modalIndicadorTitulo").textContent = tipo==="revisita" ? "Contratos com Revisita" : "Contratos TEC1 Fora do Padrão";
   $("modalIndicadorSub").textContent = tipo==="revisita" ? "Visualização agrupada por técnico." : "Baixas fora da janela programada agrupadas por técnico.";
   modal.classList.add("active");
   modal.setAttribute("aria-hidden","false");
 }
+
+function ativarBuscaModalIndicador(conteudo){
+  const inputBusca=$("buscaContratoIndicador");
+  const btnPesquisar=$("pesquisarContratoIndicador");
+  const limparBusca=$("limparBuscaContratoIndicador");
+  const resultadoBusca=$("resultadoBuscaContratoIndicador");
+  const tableScroll=conteudo?.querySelector(".table-wrap");
+  if(!inputBusca||!btnPesquisar||!tableScroll) return;
+
+  const normalizarBusca=v=>String(v||"").replace(/[^0-9a-zA-Z]/g,"").toLowerCase();
+
+  const limparDestaque=()=>{
+    conteudo.querySelectorAll("tbody tr[data-contrato]").forEach(tr=>tr.classList.remove("contrato-modal-encontrado"));
+  };
+
+  const pesquisarContrato=()=>{
+    const termo=normalizarBusca(inputBusca.value);
+    const linhas=[...conteudo.querySelectorAll("tbody tr[data-contrato]")];
+    limparDestaque();
+
+    if(!termo){
+      if(resultadoBusca) resultadoBusca.textContent="Digite um contrato para pesquisar.";
+      inputBusca.focus();
+      return;
+    }
+
+    const encontradoExato=linhas.find(tr=>String(tr.dataset.contrato||"")===termo);
+    const encontradoParcial=linhas.find(tr=>String(tr.dataset.contrato||"").includes(termo));
+    const encontrado=encontradoExato||encontradoParcial;
+
+    if(encontrado){
+      encontrado.classList.add("contrato-modal-encontrado");
+      tableScroll.scrollTo({top:Math.max(0,encontrado.offsetTop-80),behavior:"smooth"});
+      if(resultadoBusca) resultadoBusca.textContent=`Contrato encontrado: ${encontrado.dataset.contratoLabel||inputBusca.value}`;
+    }else{
+      if(resultadoBusca) resultadoBusca.textContent=`Contrato ${inputBusca.value} não encontrado nesta lista.`;
+    }
+  };
+
+  btnPesquisar.addEventListener("click",pesquisarContrato);
+  inputBusca.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();pesquisarContrato();}});
+  if(limparBusca){
+    limparBusca.addEventListener("click",()=>{
+      inputBusca.value="";
+      limparDestaque();
+      tableScroll.scrollTo({top:0,behavior:"smooth"});
+      if(resultadoBusca) resultadoBusca.textContent="Digite o contrato e clique em pesquisar.";
+      inputBusca.focus();
+    });
+  }
+  setTimeout(()=>inputBusca.focus(),80);
+}
+
 function fecharModalIndicador(){
   const modal=$("modalIndicadorDetalhe");
   if(!modal) return;
