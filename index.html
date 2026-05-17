@@ -390,7 +390,7 @@ tr.contrato-encontrado td{background:#fff2b8!important;box-shadow:inset 4px 0 0 
 .plantao-pdf-header{background:linear-gradient(135deg,#10213a,#155fc4);color:#fff;border-radius:14px;padding:18px 20px;margin-bottom:14px}
 .plantao-pdf-header h1{font-size:22px;margin:0 0 4px;font-weight:800}
 .plantao-pdf-header p{font-size:13px;margin:0;color:rgba(255,255,255,.78);font-weight:600}
-.plantao-pdf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.plantao-pdf-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .plantao-pdf-kpi{background:#fff;border:1px solid #d9e2ee;border-radius:10px;padding:10px 12px}
 .plantao-pdf-kpi span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#66758a;font-weight:800;margin-bottom:4px}
 .plantao-pdf-kpi strong{font-family:'IBM Plex Mono',monospace;font-size:18px;color:#10213a}
@@ -570,6 +570,13 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 
 .status-wrap-historico{max-width:none;padding:0 0 14px;margin:0}
 .status-wrap-historico .status{margin:0}
+.trend-value{display:inline-flex;align-items:center;gap:6px;font-weight:800}
+.trend-arrow{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;font-size:12px;font-weight:900;line-height:1;border:1px solid transparent}
+.trend-arrow.good{background:var(--green-light);color:#047857;border-color:#a7f3d0}
+.trend-arrow.bad{background:var(--red-light);color:#b91c1c;border-color:#fecaca}
+.trend-arrow.neutral{background:#eef2f7;color:#64748b;border-color:#d9e2ee}
+.historico-duplicado-alerta{display:inline-flex;align-items:center;gap:6px;margin-left:6px;padding:2px 7px;border-radius:999px;background:var(--yellow-light);color:#78350f;border:1px solid #fde68a;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+#historico .small-note strong{color:var(--navy2)}
 /* === END CORPORATE VISUAL REFRESH === */
 
 
@@ -688,6 +695,16 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 /* === FIM AJUSTE COMPACTO === */
 
 </style>
+
+<style>
+/* Botões PDF e Imagem com o mesmo efeito do Salvar, mantendo o + */
+#plantaoPdf.plantao-btn-plus::before,
+#plantaoImagem.plantao-btn-plus::before{
+  content:"+";
+  font-weight:800;
+}
+</style>
+
 </head>
 <body>
 
@@ -937,8 +954,9 @@ button:hover,.btn:hover{transform:translateY(-1px)}
       </div>
       <div class="plantoes-actions" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
         <select id="plantaoMes" class="plantoes-select" aria-label="Selecionar mês" style="flex: 1; padding: 5px 8px; font-size: 11px;"></select>
-        <button id="plantaoSalvar" class="success" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap;">Salvar</button>
-        <button id="plantaoPdf" class="primary" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap;">PDF</button>
+        <button id="plantaoSalvar" class="success" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap; justify-content: center; text-align: center;">Salvar</button>
+        <button id="plantaoPdf" class="success plantao-btn-plus" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap; justify-content: center; text-align: center;">PDF</button>
+        <button id="plantaoImagem" class="success plantao-btn-plus" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap; justify-content: center; text-align: center;">Imagem</button>
       </div>
       <div style="width: 100%;">
         <span id="plantaoSalvarFeedback" class="plantoes-save-feedback" aria-live="polite" style="min-height: 16px; color: #166534; font-size: 10px; font-weight: 800; text-align: center; display: block;"></span>
@@ -995,7 +1013,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   </div>
   <div class="card">
     <h2>Histórico Local</h2>
-    <p class="small-note">O histórico fica salvo apenas neste navegador/dispositivo.</p>
+    <p class="small-note">O histórico fica salvo apenas neste navegador/dispositivo. <strong>Seta verde</strong> indica melhora e <strong>seta vermelha</strong> indica piora em relação ao registro anterior.</p>
     <div class="table-wrap" style="margin-top:14px">
       <table>
         <thead>
@@ -2004,12 +2022,52 @@ function filtrarBasePrincipal(rows){
   });
 }
 
+function assinaturaPlanilha(rows){
+  try{
+    const arr=Array.isArray(rows)?rows:[];
+    const texto=JSON.stringify(arr);
+    let hash=2166136261;
+    for(let i=0;i<texto.length;i++){
+      hash^=texto.charCodeAt(i);
+      hash+=(hash<<1)+(hash<<4)+(hash<<7)+(hash<<8)+(hash<<24);
+    }
+    return `${arr.length}:${(hash>>>0).toString(16)}`;
+  }catch(e){
+    return `${Array.isArray(rows)?rows.length:0}:sem_assinatura`;
+  }
+}
+function lerHistoricoLocal(){
+  try{
+    const hist=JSON.parse(localStorage.getItem(STORAGE_HISTORY)||"[]");
+    return Array.isArray(hist)?hist:[];
+  }catch(e){
+    console.warn("Falha ao ler histórico local.",e);
+    return [];
+  }
+}
+function salvarHistoricoLocal(hist){
+  localStorage.setItem(STORAGE_HISTORY,JSON.stringify((Array.isArray(hist)?hist:[]).slice(0,30)));
+}
+function esc(v){
+  return String(v??"").replace(/[&<>'"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
+}
+function historicoMesmoItem(h,item){
+  if(h?.signature&&item?.signature&&h.signature===item.signature) return true;
+  const mesmoArquivo=norm(h?.fileName||"")===norm(item?.fileName||"");
+  const mesmaProducao=Number(h?.producao||0)===Number(item?.producao||0);
+  const mesmasRevisitas=Number(h?.revisitas||0)===Number(item?.revisitas||0);
+  const mesmaRevPct=Math.abs(Number(h?.revPct||0)-Number(item?.revPct||0))<0.0001;
+  const mesmaTec1=Math.abs(Number(h?.tec1||0)-Number(item?.tec1||0))<0.0001;
+  return mesmoArquivo&&mesmaProducao&&mesmasRevisitas&&mesmaRevPct&&mesmaTec1;
+}
 function salvarUltimaBase(rows,fileName){
   try{
-    const payload=JSON.stringify({fileName,date:new Date().toISOString(),rows});
+    const signature=assinaturaPlanilha(rows);
+    const payload=JSON.stringify({fileName,date:new Date().toISOString(),rows,signature});
     localStorage.setItem(STORAGE_LAST,payload);
     localStorage.setItem("lumar_manutencao_ultima_base_v2",payload);
-  }catch(e){console.warn("Não foi possível salvar.",e);}
+    return signature;
+  }catch(e){console.warn("Não foi possível salvar.",e);return "";}
 }
 function encontrarUltimaBaseSalva(){
   const candidatos=[
@@ -2029,7 +2087,7 @@ function encontrarUltimaBaseSalva(){
       const obj=JSON.parse(raw);
       const rows=obj?.rows||obj?.rawRows||obj?.dados||obj?.data||obj?.base||[];
       if(Array.isArray(rows)&&rows.length){
-        return {key,fileName:obj.fileName||obj.nomeArquivo||obj.name||"Base salva",rows};
+        return {key,fileName:obj.fileName||obj.nomeArquivo||obj.name||"Base salva",rows,signature:obj.signature||assinaturaPlanilha(rows)};
       }
     }catch(e){console.warn("Falha ao ler chave",key,e);}
   }
@@ -2045,7 +2103,7 @@ function encontrarUltimaBaseSalva(){
         if(Array.isArray(rows)&&rows.length&&rows[0]&&typeof rows[0]==="object"){
           const cols=Object.keys(rows[0]).map(norm);
           const pareceBase=cols.includes("CONTRATO")||cols.includes("LOGIN_TECNICO")||cols.includes("LOGIN TECNICO");
-          if(pareceBase) return {key,fileName:obj.fileName||obj.nomeArquivo||key,rows};
+          if(pareceBase) return {key,fileName:obj.fileName||obj.nomeArquivo||key,rows,signature:obj.signature||assinaturaPlanilha(rows)};
         }
       }catch(e){}
     }
@@ -2062,7 +2120,7 @@ function abrirAbaDashboard(){
   if($("dashboard")) $("dashboard").classList.add("active");
 }
 
-function carregarUltimaBase(){
+function carregarUltimaBase(opcoes={}){
   const saved=encontrarUltimaBaseSalva();
   if(!saved||!saved.rows?.length){
     setStatus("⚠️ Nenhuma última base salva neste navegador. Carregue uma planilha primeiro para criar o salvamento automático.");
@@ -2093,31 +2151,82 @@ function carregarUltimaBase(){
     salvarUltimaBase(rawRows,currentFileName);
     abrirAbaDashboard();
 
-    setStatus(`🔁 Última base carregada: <strong>${currentFileName}</strong>.<br>Registros carregados: <strong>${processedRows.length}</strong>.`);
+    const prefixo=opcoes.auto?"🚀 Sistema aberto carregando a última planilha salva":"🔁 Última base carregada";
+    setStatus(`${prefixo}: <strong>${currentFileName}</strong>.<br>Registros carregados: <strong>${processedRows.length}</strong>.`);
   }catch(err){
     console.error(err);
     setStatus("❌ Não foi possível carregar a última base: <strong>"+err.message+"</strong>");
   }
 }
 
-function salvarHistorico(){
-  if(!currentSummary){setStatus("⚠️ Carregue uma base antes de salvar no histórico.");return}
-  const hist=JSON.parse(localStorage.getItem(STORAGE_HISTORY)||"[]");
-  const item={id:Date.now(),date:new Date().toLocaleString("pt-BR"),fileName:currentFileName||"Base importada",producao:currentSummary.totalProducao,revisitas:currentSummary.totalRev,revPct:currentSummary.baseLen?currentSummary.totalRev/currentSummary.baseLen*100:0,tec1:currentSummary.totalTecBase?currentSummary.totalOk/currentSummary.totalTecBase*100:0,nodeTop:currentSummary.arrNode[0]?.node||"-"};
+function salvarHistorico(opcoes={}){
+  if(!currentSummary){setStatus("⚠️ Carregue uma base antes de salvar no histórico.");return {salvo:false,repetida:false}}
+  const hist=lerHistoricoLocal();
+  const signature=opcoes.signature||assinaturaPlanilha(rawRows);
+  const item={
+    id:Date.now(),
+    date:new Date().toLocaleString("pt-BR"),
+    fileName:currentFileName||"Base importada",
+    signature,
+    producao:currentSummary.totalProducao,
+    revisitas:currentSummary.totalRev,
+    revPct:currentSummary.baseLen?currentSummary.totalRev/currentSummary.baseLen*100:0,
+    tec1:currentSummary.totalTecBase?currentSummary.totalOk/currentSummary.totalTecBase*100:0,
+    nodeTop:currentSummary.arrNode[0]?.node||"-"
+  };
+  const repetida=hist.find(h=>historicoMesmoItem(h,item));
+  if(repetida){
+    renderHistorico();
+    if(!opcoes.silencioso){
+      setStatus(`⚠️ Planilha repetida: <strong>${esc(item.fileName)}</strong> já consta no histórico em <strong>${esc(repetida.date)}</strong>. Nenhum novo registro foi criado.`);
+    }
+    return {salvo:false,repetida:true,item:repetida,signature};
+  }
   hist.unshift(item);
-  localStorage.setItem(STORAGE_HISTORY,JSON.stringify(hist.slice(0,30)));
+  salvarHistoricoLocal(hist);
   renderHistorico();
-  setStatus("💾 Registro salvo no histórico local.");
+  if(!opcoes.silencioso) setStatus("💾 Registro salvo no histórico local.");
+  return {salvo:true,repetida:false,item,signature};
+}
+function setaTendencia(atual,anterior,melhorMaior=true){
+  if(anterior===undefined||anterior===null||anterior==="") return "";
+  const a=Number(atual)||0;
+  const b=Number(anterior)||0;
+  const diff=a-b;
+  if(Math.abs(diff)<0.0001) return '<span class="trend-arrow neutral" title="Sem alteração">→</span>';
+  const melhor=melhorMaior?diff>0:diff<0;
+  const seta=diff>0?"▲":"▼";
+  const classe=melhor?"good":"bad";
+  const texto=melhor?"Melhorou":"Piorou";
+  return `<span class="trend-arrow ${classe}" title="${texto} em relação ao registro anterior">${seta}</span>`;
+}
+function celulaHistorico(valor,anterior,melhorMaior,formatador){
+  const texto=formatador?formatador(valor):valor;
+  return `<span class="trend-value">${texto}${setaTendencia(valor,anterior,melhorMaior)}</span>`;
 }
 function renderHistorico(){
-  const hist=JSON.parse(localStorage.getItem(STORAGE_HISTORY)||"[]");
+  const hist=lerHistoricoLocal();
   const tbody=$("tabelaHistorico");
+  if(!tbody) return;
   if(!hist.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty">Sem histórico salvo.</div></td></tr>';return}
-  tbody.innerHTML=hist.map(h=>`<tr><td>${h.date}</td><td>${h.fileName}</td><td>${h.producao}</td><td>${h.revisitas}</td><td>${pct(h.revPct)}</td><td>${pct(h.tec1)}</td><td>${h.nodeTop}</td><td><button class="danger" style="padding:6px 10px;font-size:12px" onclick="removerHistorico(${h.id})">Remover</button></td></tr>`).join("");
+  tbody.innerHTML=hist.map((h,i)=>{
+    const anterior=hist[i+1]||null;
+    const duplicado="";
+    return `<tr>
+      <td>${esc(h.date)}</td>
+      <td>${esc(h.fileName)}${duplicado}</td>
+      <td>${celulaHistorico(h.producao,anterior?.producao,true,v=>esc(v))}</td>
+      <td>${celulaHistorico(h.revisitas,anterior?.revisitas,false,v=>esc(v))}</td>
+      <td>${celulaHistorico(h.revPct,anterior?.revPct,false,v=>pct(v))}</td>
+      <td>${celulaHistorico(h.tec1,anterior?.tec1,true,v=>pct(v))}</td>
+      <td>${esc(h.nodeTop)}</td>
+      <td><button class="danger" style="padding:6px 10px;font-size:12px" onclick="removerHistorico(${Number(h.id)})">Remover</button></td>
+    </tr>`;
+  }).join("");
 }
 function removerHistorico(id){
-  const hist=JSON.parse(localStorage.getItem(STORAGE_HISTORY)||"[]").filter(h=>h.id!==id);
-  localStorage.setItem(STORAGE_HISTORY,JSON.stringify(hist));renderHistorico();
+  const hist=lerHistoricoLocal().filter(h=>Number(h.id)!==Number(id));
+  salvarHistoricoLocal(hist);renderHistorico();
 }
 window.removerHistorico=removerHistorico;
 window.carregarUltimaBase=carregarUltimaBase;
@@ -2137,10 +2246,11 @@ async function carregarBase(){
     const filtrado=aplicarFiltros(processedRows);
     lastRenderRows=filtrado;
     renderDashboard(processarResumo(filtrado));
-    salvarUltimaBase(rows,currentFileName);
-    salvarHistorico();
+    const signature=salvarUltimaBase(rows,currentFileName);
+    const historicoResultado=salvarHistorico({silencioso:true,signature});
     const z450=currentSummary.arr.find(t=>t.login==="Z450037");
-    setStatus(`✅ Base carregada.<br>Base manutenção: <strong>${processedRows.length}</strong> | Revisitas 10d: <strong>${currentSummary.totalRev}</strong>${z450?`<br>Conferência ${z450.nome}: <strong>${z450.producao}</strong> produção e <strong>${z450.revisitas}</strong> revisitas 10d.`:""}`);
+    const avisoRepetida=historicoResultado.repetida?`<br>⚠️ Planilha repetida: já estava no histórico em <strong>${esc(historicoResultado.item.date)}</strong>. Não criei novo registro.`:"";
+    setStatus(`✅ Base carregada.<br>Base manutenção: <strong>${processedRows.length}</strong> | Revisitas 10d: <strong>${currentSummary.totalRev}</strong>${z450?`<br>Conferência ${z450.nome}: <strong>${z450.producao}</strong> produção e <strong>${z450.revisitas}</strong> revisitas 10d.`:""}${avisoRepetida}`);
   }catch(err){console.error(err);setStatus("❌ Erro ao carregar: <strong>"+err.message+"</strong>");}
 }
 function reaplicarFiltros(){
@@ -2284,7 +2394,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   });
   renderHistorico();
-  if(localStorage.getItem(STORAGE_LAST)) carregarUltimaBase();
+  if(encontrarUltimaBaseSalva()) carregarUltimaBase({auto:true});
 });
 </script>
 
@@ -2332,6 +2442,14 @@ document.addEventListener("DOMContentLoaded",()=>{
   function tituloPlantaoMes(month){
     const mes=MESES_NOMES[numeroMesPlantao(month)]||String(month.key||"").toUpperCase();
     return `PLANTÕES – ${mes} 2026 | TERESINA / PIAUÍ`;
+  }
+  function anoPlantaoMes(month){
+    const dataBase=month?.rows?.find(r=>r?.date)?.date;
+    if(dataBase) return isoToDate(dataBase).getFullYear();
+    return 2026;
+  }
+  function tituloPDFPlantaoMes(month){
+    return "ESCALA DE PLANTÃO - VISITA TECNICA";
   }
   function ajustarTituloPlantao(month){
     const titulo=tituloPlantaoMes(month)||"PLANTÕES – MAIO 2026 | TERESINA / PIAUÍ";
@@ -2713,16 +2831,13 @@ document.addEventListener("DOMContentLoaded",()=>{
     return String(v??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
   }
 
-  async function gerarPDFPlantaoMes(){
-    const sel=$p("plantaoMes");
-    if(!sel||!plantaoState) return;
-    const month=plantaoState.months[Number(sel.value)||0];
-    if(!month) return;
-    atualizarMesFromInputs(month);
-    sincronizarEventosMes(month);
-    garantirConfigPlantao(false);
-    renderTabelaPlantoes();
+  function nomeArquivoPlantaoMes(month,ext){
+    const nome=String(month?.key||"plantao").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9_-]+/gi,"_").toLowerCase();
+    return `escala_plantoes_${nome}.${ext}`;
+  }
 
+  function criarShellPlantaoMes(month){
+    const mostrarTecnicoC=month.rows.some(row=>!!row.baseC);
     const linhas=month.rows.map(row=>{
       const calc=calcularLinhaPlantao(row);
       return `<tr>
@@ -2732,35 +2847,73 @@ document.addEventListener("DOMContentLoaded",()=>{
         <td>${escapePlantao(row.description)}</td>
         <td>${escapePlantao(calc.tecA?.name||"")}</td>
         <td>${escapePlantao(calc.tecB?.name||"")}</td>
-        <td>${escapePlantao(calc.tecC?.name||"-")}</td>
+        ${mostrarTecnicoC?`<td>${escapePlantao(calc.tecC?.name||"-")}</td>`:""}
         <td>${escapePlantao(calc.folgaA)}</td>
         <td>${escapePlantao(calc.folgaB)}</td>
-        <td>${escapePlantao(calc.folgaC||"-")}</td>
+        ${mostrarTecnicoC?`<td>${escapePlantao(calc.folgaC||"-")}</td>`:""}
         <td>${escapePlantao(calc.aviso)}</td>
       </tr>`;
     }).join("");
     const totalTerceiro=month.rows.filter(r=>r.baseC).length;
+    const totalPlantoes=month.rows.length*2+totalTerceiro;
+    const colunasTecnicoC=mostrarTecnicoC?"<th>Téc. C</th>":"";
+    const colunasFolgaC=mostrarTecnicoC?"<th>Folga C</th>":"";
     const shell=document.createElement("div");
     shell.className="plantao-pdf-shell";
     shell.innerHTML=`<div class="plantao-pdf-header">
-        <h1>${escapePlantao(tituloPlantaoMes(month))}</h1>
-        <p>Domingos e feriados de Teresina/PI · Gerado em ${new Date().toLocaleString("pt-BR")}</p>
+        <h1>${escapePlantao(tituloPDFPlantaoMes(month))}</h1>
       </div>
       <div class="plantao-pdf-kpis">
-        <div class="plantao-pdf-kpi"><span>Dias especiais</span><strong>${month.rows.length}</strong></div>
-        <div class="plantao-pdf-kpi"><span>Plantões</span><strong>${month.rows.length*2+totalTerceiro}</strong></div>
-        <div class="plantao-pdf-kpi"><span>Folgas</span><strong>${month.rows.length*2+totalTerceiro}</strong></div>
+        <div class="plantao-pdf-kpi"><span>Plantões</span><strong>${totalPlantoes}</strong></div>
+        <div class="plantao-pdf-kpi"><span>Folgas</span><strong>${totalPlantoes}</strong></div>
         <div class="plantao-pdf-kpi"><span>Mês</span><strong>${escapePlantao(month.key||"")}</strong></div>
       </div>
       <div class="plantao-pdf-table">
         <table>
-          <thead><tr><th>Data</th><th>Semana</th><th>Tipo</th><th>Descrição</th><th>Técnico A</th><th>Técnico B</th><th>Téc. C</th><th>Folga A</th><th>Folga B</th><th>Folga C</th><th>Aviso</th></tr></thead>
+          <thead><tr><th>Data</th><th>Semana</th><th>Tipo</th><th>Descrição</th><th>Técnico A</th><th>Técnico B</th>${colunasTecnicoC}<th>Folga A</th><th>Folga B</th>${colunasFolgaC}<th>Aviso</th></tr></thead>
           <tbody>${linhas}</tbody>
         </table>
       </div>`;
     document.body.appendChild(shell);
+    return shell;
+  }
+
+  function prepararExportacaoPlantaoMes(){
+    const sel=$p("plantaoMes");
+    if(!sel||!plantaoState) return null;
+    const month=plantaoState.months[Number(sel.value)||0];
+    if(!month) return null;
+    atualizarMesFromInputs(month);
+    sincronizarEventosMes(month);
+    garantirConfigPlantao(false);
+    renderTabelaPlantoes();
+    return month;
+  }
+
+  async function gerarImagemPlantaoMes(){
+    const month=prepararExportacaoPlantaoMes();
+    if(!month) return;
+    let shell=null;
+    try{
+      if(!window.html2canvas){ alert("Biblioteca de imagem não carregada."); return; }
+      shell=criarShellPlantaoMes(month);
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+      const canvas=await html2canvas(shell,{scale:2,backgroundColor:"#f7f9fc",useCORS:true,scrollX:0,scrollY:0});
+      const a=document.createElement("a");
+      a.href=canvas.toDataURL("image/png");
+      a.download=nomeArquivoPlantaoMes(month,"png");
+      a.click();
+    }catch(e){ console.error(e); if(typeof setStatus==="function") setStatus("❌ Erro ao gerar imagem dos plantões: <strong>"+e.message+"</strong>"); }
+    finally{ if(shell) shell.remove(); }
+  }
+
+  async function gerarPDFPlantaoMes(){
+    const month=prepararExportacaoPlantaoMes();
+    if(!month) return;
+    let shell=null;
     try{
       if(!window.html2canvas||!window.jspdf){ alert("Bibliotecas de PDF não carregadas."); return; }
+      shell=criarShellPlantaoMes(month);
       await new Promise(resolve=>requestAnimationFrame(resolve));
       const canvas=await html2canvas(shell,{scale:2,backgroundColor:"#f7f9fc",useCORS:true,scrollX:0,scrollY:0});
       const img=canvas.toDataURL("image/png");
@@ -2776,10 +2929,9 @@ document.addEventListener("DOMContentLoaded",()=>{
       pdf.addImage(img,"PNG",margin,position,imgW,imgH);
       heightLeft-=pageH-(margin*2);
       while(heightLeft>0){ pdf.addPage(); position=margin-(imgH-heightLeft); pdf.addImage(img,"PNG",margin,position,imgW,imgH); heightLeft-=pageH-(margin*2); }
-      const nome=String(month.key||"plantao").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9_-]+/gi,"_").toLowerCase();
-      pdf.save(`escala_plantoes_${nome}.pdf`);
+      pdf.save(nomeArquivoPlantaoMes(month,"pdf"));
     }catch(e){ console.error(e); if(typeof setStatus==="function") setStatus("❌ Erro ao gerar PDF dos plantões: <strong>"+e.message+"</strong>"); }
-    finally{ shell.remove(); }
+    finally{ if(shell) shell.remove(); }
   }
 
   function renderTabelaPlantoes(){
@@ -2855,6 +3007,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     const salvar=$p("plantaoSalvar");
     const pdfBtn=$p("plantaoPdf");
+    const imgBtn=$p("plantaoImagem");
     const restaurar=$p("plantaoRestaurar");
     const redistribuir=$p("plantaoRedistribuirFolgas");
     const redistribuirPlantoes=$p("plantaoRedistribuirPlantoes");
@@ -2914,6 +3067,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       },4500);
     });
     if(pdfBtn) pdfBtn.addEventListener("click",gerarPDFPlantaoMes);
+    if(imgBtn) imgBtn.addEventListener("click",gerarImagemPlantaoMes);
     if(restaurar) restaurar.addEventListener("click",()=>{
       localStorage.removeItem(STORAGE_PLANTOES);
       plantaoState=clone(ORIGINAL_PLANTOES);
