@@ -4098,22 +4098,24 @@ async function exportarPDF(){
 /* === DIAS TRABALHADOS DINÂMICO - Google Sheets === */
 const DIAS_SHEET_CONFIG={
   spreadsheetId:"1F7ZZUkY0XcDKyTQ1duFA0IflC71D5kBnbyiARV2bJXQ",
+  // GID informado no primeiro link da planilha. Usar o GID evita erro quando o nome da aba
+  // muda de MAIO para Maio, ou quando o Google diferencia maiúsculas/minúsculas.
   gidMaio2026:"881500199",
   anoPadrao:2026,
   metaFallback:165,
   meses:[
-    {num:0,nome:"Janeiro",label:"JANEIRO",tabs:["VT JANEIRO 2026","VT, JANEIRO 2026"]},
-    {num:1,nome:"Fevereiro",label:"FEVEREIRO",tabs:["VT FEVEREIRO 2026"]},
-    {num:2,nome:"Março",label:"MARÇO",tabs:["VT MARÇO 2026","VT MARCO 2026"]},
-    {num:3,nome:"Abril",label:"ABRIL",tabs:["VT ABRIL 2026"]},
-    {num:4,nome:"Maio",label:"MAIO",tabs:["VT MAIO 2026"]},
-    {num:5,nome:"Junho",label:"JUNHO",tabs:["VT JUNHO 2026"]},
-    {num:6,nome:"Julho",label:"JULHO",tabs:["VT JULHO 2026"]},
-    {num:7,nome:"Agosto",label:"AGOSTO",tabs:["VT AGOSTO 2026"]},
-    {num:8,nome:"Setembro",label:"SETEMBRO",tabs:["VT SETEMBRO 2026"]},
-    {num:9,nome:"Outubro",label:"OUTUBRO",tabs:["VT OUTUBRO 2026"]},
-    {num:10,nome:"Novembro",label:"NOVEMBRO",tabs:["VT NOVEMBRO 2026"]},
-    {num:11,nome:"Dezembro",label:"DEZEMBRO",tabs:["VT DEZEMBRO 2026"]}
+    {num:0,nome:"Janeiro",label:"JANEIRO",tabs:["VT Janeiro 2026","VT JANEIRO 2026","VT, Janeiro 2026","VT, JANEIRO 2026"]},
+    {num:1,nome:"Fevereiro",label:"FEVEREIRO",tabs:["VT Fevereiro 2026","VT FEVEREIRO 2026"]},
+    {num:2,nome:"Março",label:"MARÇO",tabs:["VT Março 2026","VT MARÇO 2026","VT Marco 2026","VT MARCO 2026"]},
+    {num:3,nome:"Abril",label:"ABRIL",tabs:["VT Abril 2026","VT ABRIL 2026"]},
+    {num:4,nome:"Maio",label:"MAIO",gid:"881500199",tabs:["VT Maio 2026","VT MAIO 2026","VT maio 2026"]},
+    {num:5,nome:"Junho",label:"JUNHO",tabs:["VT Junho 2026","VT JUNHO 2026"]},
+    {num:6,nome:"Julho",label:"JULHO",tabs:["VT Julho 2026","VT JULHO 2026"]},
+    {num:7,nome:"Agosto",label:"AGOSTO",tabs:["VT Agosto 2026","VT AGOSTO 2026"]},
+    {num:8,nome:"Setembro",label:"SETEMBRO",tabs:["VT Setembro 2026","VT SETEMBRO 2026"]},
+    {num:9,nome:"Outubro",label:"OUTUBRO",tabs:["VT Outubro 2026","VT OUTUBRO 2026"]},
+    {num:10,nome:"Novembro",label:"NOVEMBRO",tabs:["VT Novembro 2026","VT NOVEMBRO 2026"]},
+    {num:11,nome:"Dezembro",label:"DEZEMBRO",tabs:["VT Dezembro 2026","VT DEZEMBRO 2026"]}
   ]
 };
 
@@ -4215,16 +4217,24 @@ function extrairDadosDias(matriz,mesInfo){
 function urlsDiasPlanilha(mesInfo){
   const id=DIAS_SHEET_CONFIG.spreadsheetId;
   const urls=[];
-  (mesInfo.tabs||[]).forEach(nome=>urls.push({nome,sheet:nome,url:`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nome)}`}));
-  if(mesInfo.gid){
-    urls.push({nome:`gid ${mesInfo.gid}`,gid:mesInfo.gid,url:`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${mesInfo.gid}`});
-  }
+  const vistos=new Set();
+  const add=(item)=>{
+    const chave=item.gid?`gid:${item.gid}`:`sheet:${item.sheet||item.nome}`;
+    if(vistos.has(chave)) return;
+    vistos.add(chave);
+    urls.push(item);
+  };
+  // 1º tenta pelo GID quando conhecido. Para maio/2026 esse é o caminho mais seguro.
+  const gid=mesInfo.gid || (mesInfo.num===4?DIAS_SHEET_CONFIG.gidMaio2026:null);
+  if(gid) add({nome:`VT ${mesInfo.nome} ${DIAS_SHEET_CONFIG.anoPadrao} · gid ${gid}`,gid,url:`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`});
+  // 2º tenta por todos os nomes prováveis da aba, respeitando maiúsculas/minúsculas.
+  (mesInfo.tabs||[]).forEach(nome=>add({nome,sheet:nome,url:`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nome)}`}));
   return urls;
 }
 function gvizDiasUrl(item,callbackName){
   const id=DIAS_SHEET_CONFIG.spreadsheetId;
   const tqx=`out:json;responseHandler:${callbackName}`;
-  let url=`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?headers=0&tqx=${encodeURIComponent(tqx)}`;
+  let url=`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?headers=0&tqx=${encodeURIComponent(tqx)}&tq=${encodeURIComponent("select *")}`;
   if(item.gid) url+=`&gid=${encodeURIComponent(item.gid)}`;
   else url+=`&sheet=${encodeURIComponent(item.sheet||item.nome)}`;
   return url;
@@ -4348,8 +4358,10 @@ function renderDiasErro(msg){
   setDiasText("diasUteisRestantes","-");
   setDiasText("diasMetaDia","-");
   setDiasText("diasCompetencia","-");
+  const mesInfo=mesDiasSelecionado();
+  const tentativas=urlsDiasPlanilha(mesInfo).map(u=>esc(u.nome)).join(", ");
   const regra=$("diasRegraMedia");
-  if(regra) regra.innerHTML=`<strong>Não foi possível carregar os dias trabalhados.</strong><br>${esc(msg)}<br><br>Confira se a planilha está em <strong>Compartilhar → Qualquer pessoa com o link → Leitor</strong> e se existe uma aba VT para o mês selecionado.`;
+  if(regra) regra.innerHTML=`<strong>Não foi possível carregar os dias trabalhados.</strong><br>${esc(msg)}<br><br><strong>Tentativas:</strong> ${tentativas || "nenhuma"}.<br><br>Confira se a planilha está em <strong>Compartilhar → Qualquer pessoa com o link → Leitor</strong>. Se ainda não abrir, use <strong>Arquivo → Compartilhar → Publicar na Web</strong> na planilha do Google e publique a aba VT do mês.`;
   const tbody=$("diasTabelaTecnicos");
   if(tbody) tbody.innerHTML='<tr><td colspan="4"><div class="empty">Sem dados para exibir.</div></td></tr>';
 }
