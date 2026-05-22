@@ -5520,7 +5520,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     return iso>=tec.start&&iso<=tec.end;
   }
   function disponivel(tec,iso,excluidos=new Set()){
-    return tec && tec.status!=="Técnico noturno" && !excluidos.has(tec.id);
+    return tec && !["Inativo","Férias","Técnico noturno"].includes(tec.status) && !excluidos.has(tec.id);
   }
   function escolherTecnico(preferidoId,iso,excluidos=new Set()){
     const pref=tecnicoPorId(preferidoId);
@@ -5781,7 +5781,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const ids=[tecA.id,tecB.id].concat(tecC?[tecC.id]:[]);
     if(new Set(ids).size!==ids.length) aviso="TÉCNICO REPETIDO";
     else if([folgaA,folgaB,folgaC].filter(Boolean).length!==new Set([folgaA,folgaB,folgaC].filter(Boolean)).size) aviso="FOLGAS NO MESMO DIA";
-    else if(mudou) aviso="Redistribuído por status noturno";
+    else if(mudou) aviso="Redistribuído por status indisponível";
     return {tecA,tecB,tecC,folgaA,folgaB,folgaC,aviso,mudou};
   }
 
@@ -5918,10 +5918,10 @@ document.addEventListener("DOMContentLoaded",()=>{
       const folgaA=calc.folgaA;
       const folgaB=calc.folgaB;
       const folgaC=calc.folgaC;
-      let aviso=calc.aviso==="OK"?"✔ OK":(calc.aviso==="Redistribuído por status noturno"?"🔄 Redistribuído (status noturno)":"⚠ "+calc.aviso+"!");
+      let aviso=calc.aviso==="OK"?"✔ OK":(calc.aviso==="Redistribuído por status indisponível"?"🔄 Redistribuído (status indisponível)":"⚠ "+calc.aviso+"!");
       let avisoClasse=calc.aviso==="OK"?"plantoes-aviso-ok":"plantoes-aviso-alerta";
       if(calc.aviso!=="OK"){
-        if(calc.aviso==="Redistribuído por status noturno") redistribuidos++;
+        if(calc.aviso==="Redistribuído por status indisponível") redistribuidos++;
         else avisos++;
       }
       return `<tr data-row="${idx}">
