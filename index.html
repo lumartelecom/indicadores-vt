@@ -5707,6 +5707,22 @@ document.addEventListener("DOMContentLoaded",()=>{
     return true;
   }
 
+  function garantirTodosTecnicosNoMes(month){
+    if(!month||!Array.isArray(month.rows)) return false;
+    const ativos=(plantaoState.technicians||[]).filter(t=>disponivel(t,"2026-01-01",new Set()));
+    const vagas=month.rows.reduce((total,row)=>total+2+(row.baseC?1:0),0);
+    const minimo=Math.min(ativos.length,vagas);
+    const ativosIds=new Set(ativos.map(t=>t.id));
+    const escalados=new Set();
+    month.rows.forEach(row=>{
+      [row.baseA,row.baseB,row.baseC].forEach(id=>{
+        if(ativosIds.has(id)) escalados.add(id);
+      });
+    });
+    if(escalados.size>=minimo) return false;
+    return redistribuirPlantoesMes(month);
+  }
+
   function redistribuirPlantoesMes(month){
     if(!month||!Array.isArray(month.rows)) return false;
     garantirConfigPlantao(false);
@@ -5717,18 +5733,30 @@ document.addEventListener("DOMContentLoaded",()=>{
     let ultimoPlantao=mesAnterior?.rows?.length?mesAnterior.rows[mesAnterior.rows.length-1]:null;
     let ultimosIds=ultimoPlantao?new Set([ultimoPlantao.baseA,ultimoPlantao.baseB,ultimoPlantao.baseC].filter(Boolean)):new Set();
     const offset=Number(month.redistribPlantoesOffset||0);
+    let cursor=offset%ativos.length;
+    const pegarProximo=(lista,excluidos,evitar)=>{
+      const limite=lista.length*2;
+      for(let tentativa=0;tentativa<limite;tentativa++){
+        const cand=lista[cursor%lista.length];
+        cursor++;
+        if(excluidos.has(cand.id)) continue;
+        if(tentativa<lista.length && evitar.has(cand.id)) continue;
+        return cand;
+      }
+      return lista.find(t=>!excluidos.has(t.id))||lista[0];
+    };
     month.rows.forEach((row,idx)=>{
       const disponiveis=ativos.filter(t=>disponivel(t,row.date,new Set()));
       const lista=disponiveis.length>=2?disponiveis:ativos;
-      const candidatos=lista.filter(t=>!ultimosIds.has(t.id));
-      const baseLista=candidatos.length>=2?candidatos:lista;
-      const base=(idx*2+offset)%baseLista.length;
-      const a=baseLista[base];
-      const b=baseLista[(base+1)%baseLista.length]||baseLista.find(t=>t.id!==a.id)||a;
+      const usadosLinha=new Set();
+      const a=pegarProximo(lista,usadosLinha,ultimosIds);
+      usadosLinha.add(a.id);
+      const b=pegarProximo(lista,usadosLinha,ultimosIds);
+      usadosLinha.add(b.id);
       row.baseA=a.id;
       row.baseB=b.id;
       if(row.baseC){
-        const c=baseLista.find(t=>t.id!==a.id&&t.id!==b.id)||lista.find(t=>t.id!==a.id&&t.id!==b.id);
+        const c=pegarProximo(lista,usadosLinha,ultimosIds);
         row.baseC=c?c.id:"";
       }
       ultimosIds=new Set([row.baseA,row.baseB,row.baseC].filter(Boolean));
@@ -5877,6 +5905,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(existingRows.length) atualizarMesFromInputs(month);
     sincronizarEventosMes(month);
     garantirConfigPlantao(false);
+    garantirTodosTecnicosNoMes(month);
     atualizarToggleTerceiro();
 
     let avisos=0, redistribuidos=0, totalTerceiro=0;
