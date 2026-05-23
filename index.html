@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -573,6 +573,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 @media(max-width:430px){.kpis{grid-template-columns:1fr 1fr}.kpi-label{font-size:9px}.kpi-value{font-size:21px}.logo-wrap{width:40px;height:40px}.header-titles .subtitle{font-size:10px}.import-bar{grid-template-columns:1fr}.import-bar button{width:100%;justify-content:center}}
 
 .status-wrap-historico{max-width:none;padding:0 0 14px;margin:0}
+#historico .historico-import-bar{margin:14px 0 4px;padding:12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.72)}
 .status-wrap-historico .status{margin:0}
 .trend-value{display:inline-flex;align-items:center;gap:6px;font-weight:800}
 .trend-arrow{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;font-size:12px;font-weight:900;line-height:1;border:1px solid transparent}
@@ -1821,15 +1822,6 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   </div>
 </header>
 
-<!-- IMPORT BAR -->
-<div class="import-bar-wrap">
-  <div class="import-bar">
-    <input type="file" id="fileInput" accept=".csv,.zip,.xlsx,.xls">
-    <button id="btnCarregar" type="button">Carregar Base</button>
-    <button id="btnLimpar" type="button" class="secondary">Limpar</button>
-  </div>
-</div>
-
 
 <div class="container">
 
@@ -2139,6 +2131,11 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   <div class="card">
     <h2>Histórico Local</h2>
     <p class="small-note">O histórico fica salvo apenas neste navegador/dispositivo. <strong>Seta verde</strong> indica melhora e <strong>seta vermelha</strong> indica piora em relação ao registro anterior.</p>
+    <div class="import-bar historico-import-bar" id="historicoActions">
+      <input type="file" id="fileInput" accept=".csv,.zip,.xlsx,.xls">
+      <button id="btnCarregar" type="button">Carregar Base</button>
+      <button id="btnLimpar" type="button" class="secondary">Limpar</button>
+    </div>
     <div class="table-wrap" style="margin-top:14px">
       <table>
         <thead>
@@ -6488,3 +6485,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
