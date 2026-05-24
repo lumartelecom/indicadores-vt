@@ -2271,7 +2271,6 @@ button:hover,.btn:hover{transform:translateY(-1px)}
       </div>
       <div class="plantoes-actions" style="display: flex; flex-direction: row; gap: 6px; align-items: center;">
         <select id="plantaoMes" class="plantoes-select" aria-label="Selecionar mês" style="flex: 1; padding: 5px 8px; font-size: 11px;"></select>
-        <button id="plantaoSalvar" class="success" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap; justify-content: center; text-align: center;">Salvar</button>
         <button id="plantaoPdf" class="success plantao-btn-plus" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap; justify-content: center; text-align: center;">PDF</button>
         <button id="plantaoImagem" class="success plantao-btn-plus" type="button" style="flex: 1; padding: 6px 8px; font-size: 10px; white-space: nowrap; justify-content: center; text-align: center;">Imagem</button>
       </div>
@@ -6378,7 +6377,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         contagem.set(id,(contagem.get(id)||0)+1);
       });
     });
-    const itens=tecnicosBase
+    const itens=(plantaoState.technicians||[])
       .filter(t=>contagem.has(t.id))
       .map(t=>({nome:t.name,qtd:contagem.get(t.id)||0}))
       .sort((a,b)=>b.qtd-a.qtd || a.nome.localeCompare(b.nome,"pt-BR"));
@@ -6585,7 +6584,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     renderConfigPlantoes();
     renderTabelaPlantoes();
 
-    const salvar=$p("plantaoSalvar");
     const pdfBtn=$p("plantaoPdf");
     const imgBtn=$p("plantaoImagem");
     const editarFerias=$p("plantaoEditarFerias");
@@ -6626,7 +6624,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       const body=$p("plantaoTabelaBody");
       if(body) body.innerHTML="";
       renderTabelaPlantoes();
-      if(typeof setStatus==="function") setStatus(ok?"Folgas redistribuídas para o mês selecionado. Clique em <strong>Salvar alterações</strong> para manter.":"Não foi possível redistribuir as folgas deste mês.");
+      if(typeof setStatus==="function") setStatus(ok?"Folgas redistribuídas e salvas para o mês selecionado.":"Não foi possível redistribuir as folgas deste mês.");
       const feedback=$p("plantaoSalvarFeedback");
       if(feedback) feedback.textContent=ok?"Folgas redistribuídas e salvas.":"Não foi possível redistribuir.";
       if(ok) salvarEdicaoPlantoesAutomaticamente();
@@ -6642,31 +6640,10 @@ document.addEventListener("DOMContentLoaded",()=>{
       const body=$p("plantaoTabelaBody");
       if(body) body.innerHTML="";
       renderTabelaPlantoes();
-      if(typeof setStatus==="function") setStatus(ok?"Plantões redistribuídos para o mês selecionado. Clique em <strong>Salvar alterações</strong> para manter.":"Não foi possível redistribuir os plantões deste mês.");
+      if(typeof setStatus==="function") setStatus(ok?"Plantões redistribuídos e salvos para o mês selecionado.":"Não foi possível redistribuir os plantões deste mês.");
       const feedback=$p("plantaoSalvarFeedback");
       if(feedback) feedback.textContent=ok?"Plantões redistribuídos e salvos.":"Não foi possível redistribuir plantões.";
       if(ok) salvarEdicaoPlantoesAutomaticamente();
-    });
-    if(salvar) salvar.addEventListener("click",()=>{
-      const sel=$p("plantaoMes");
-      if(sel){
-        plantaoState.selectedMonthIndex=Number(sel.value)||0;
-        atualizarMesFromInputs(plantaoState.months[plantaoState.selectedMonthIndex]);
-      }
-      const textoOriginal=salvar.dataset.labelOriginal||salvar.textContent;
-      salvar.dataset.labelOriginal=textoOriginal;
-      const ok=salvarStatePlantoes();
-      plantaoEdicaoGeralAtiva=false;
-      atualizarEstadoEdicaoPlantoes();
-      const feedback=$p("plantaoSalvarFeedback");
-      salvar.textContent=ok?"Salvo neste navegador":"Erro ao salvar";
-      if(feedback) feedback.textContent=ok?"Alterações salvas neste navegador. Ao reabrir esta página no mesmo navegador, a escala continua como você deixou.":"Não foi possível salvar. Verifique se o navegador permite armazenamento local.";
-      salvar.disabled=true;
-      setTimeout(()=>{
-        salvar.textContent=textoOriginal;
-        salvar.disabled=false;
-        if(feedback) feedback.textContent="";
-      },4500);
     });
     if(pdfBtn) pdfBtn.addEventListener("click",gerarPDFPlantaoMes);
     if(imgBtn) imgBtn.addEventListener("click",gerarImagemPlantaoMes);
