@@ -6115,7 +6115,7 @@ document.addEventListener("DOMContentLoaded",()=>{
           .sort((a,b)=>a.iso.localeCompare(b.iso));
         const atual=Number(row[campo]);
         let escolhido=candidatos.find(c=>c.dia===atual && !usadas.has(c.iso));
-        if(!escolhido || candidatos.findIndex(c=>c.dia===escolhido.dia)>idx){
+        if(!escolhido){
           escolhido=candidatos.find(c=>!usadas.has(c.iso))||escolhido||candidatos[Math.min(idx,candidatos.length-1)];
         }
         if(escolhido && Number(row[campo])!==Number(escolhido.dia)){
@@ -6127,6 +6127,24 @@ document.addEventListener("DOMContentLoaded",()=>{
       });
     });
     return alterou;
+  }
+  function conflitoFolgaManual(month,rowIndex,campo,weekday){
+    const row=month?.rows?.[rowIndex];
+    if(!row||!campo) return null;
+    const iso=folgaISOFromEvent(row.date,weekday);
+    const campos=["folgaAWeekday","folgaBWeekday","folgaCWeekday"];
+    for(let i=0;i<(month.rows||[]).length;i++){
+      const outra=month.rows[i];
+      for(const c of campos){
+        if(i===rowIndex && c===campo) continue;
+        if(c==="folgaCWeekday"&&!outra.baseC) continue;
+        if(folgaISOFromEvent(outra.date,outra[c])===iso){
+          const tecnico=c==="folgaAWeekday"?tecnicoPorId(outra.baseA):c==="folgaBWeekday"?tecnicoPorId(outra.baseB):tecnicoPorId(outra.baseC);
+          return {iso,data:formatDateBR(iso),tecnico:tecnico?.name||"outro técnico"};
+        }
+      }
+    }
+    return null;
   }
   function tecnicoPorId(id){
     return plantaoState.technicians.find(t=>t.id===id)||plantaoState.technicians[0];
@@ -6580,8 +6598,24 @@ document.addEventListener("DOMContentLoaded",()=>{
     body.querySelectorAll("input,select").forEach(el=>{
       el.disabled=!plantaoEdicaoGeralAtiva;
       el.title=plantaoEdicaoGeralAtiva?"Campo liberado para edição":"Clique em Editar para alterar os plantões";
+      el.addEventListener("focus",()=>{el.dataset.prevValue=el.value;});
       el.addEventListener("change",()=>{
         if(!plantaoEdicaoGeralAtiva) return;
+        if(el.dataset.field&&el.dataset.field.startsWith("folga")){
+          const tr=el.closest("tr[data-row]");
+          const rowIndex=Number(tr?.dataset.row);
+          const conflito=conflitoFolgaManual(month,rowIndex,el.dataset.field,Number(el.value));
+          if(conflito){
+            el.value=el.dataset.prevValue||el.defaultValue||el.value;
+            const msg=`Folga não alterada: ${conflito.tecnico} já está de folga em ${conflito.data}. Escolha outro dia disponível.`;
+            const feedback=$p("plantaoSalvarFeedback");
+            if(feedback) feedback.textContent=msg;
+            if(typeof setStatus==="function") setStatus(`⚠️ ${msg}`);
+            setTimeout(()=>{if(feedback&&feedback.textContent===msg) feedback.textContent="";},4200);
+            renderTabelaPlantoes();
+            return;
+          }
+        }
         atualizarMesFromInputs(month);
         renderTabelaPlantoes();
         salvarEdicaoPlantoesAutomaticamente();
