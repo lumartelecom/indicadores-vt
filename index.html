@@ -5664,7 +5664,7 @@ function mesInfoPlantaoVigenteDias(fallbackMesInfo){
 
 
 async function atualizarDiasTrabalhados(){
-  const mesInfo=mesInfoPlantaoVigenteDias(mesDiasSelecionado());
+  const mesInfo=mesDiasSelecionado();
   const selDias=$("diasMes");
   if(selDias&&mesInfo) selDias.value=String(mesInfo.num);
   const painel=$("dias");
@@ -5720,19 +5720,8 @@ function inicializarDiasTrabalhados(){
     metaInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();metaInput.blur();aplicarMetaManualDias(metaInput.value);}});
   }
   if(!inicializarDiasTrabalhados._plantaoListener){
-    document.addEventListener("change",e=>{
-      const plantaoSel=e.target;
-      if(!plantaoSel||plantaoSel.id!=="plantaoMes") return;
-      const txt=plantaoSel.options?.[plantaoSel.selectedIndex]?.text||plantaoSel.value||"";
-      const encontrado=DIAS_SHEET_CONFIG.meses.find(m=>head(txt).includes(head(m.nome))||head(txt).includes(m.label));
-      if(encontrado&&sel){sel.value=String(encontrado.num);atualizarDiasTrabalhados();}
-    });
     document.addEventListener("lumar:plantoes-atualizados",()=>{
-      const plantaoSel=document.getElementById("plantaoMes");
-      const txt=plantaoSel?.options?.[plantaoSel.selectedIndex]?.text||plantaoSel?.value||"";
-      const encontrado=DIAS_SHEET_CONFIG.meses.find(m=>head(txt).includes(head(m.nome))||head(txt).includes(m.label));
-      if(encontrado&&sel) sel.value=String(encontrado.num);
-      atualizarDiasTrabalhados();
+      atualizarCardCapacidadeSelecionada();
     });
     inicializarDiasTrabalhados._plantaoListener=true;
   }
