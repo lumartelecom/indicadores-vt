@@ -221,11 +221,28 @@ tbody tr:last-child td{border-bottom:0}
 .priority-card.redline{border-left:4px solid var(--red);background:#fff7f7}
 .priority-card.orangeline{border-left:4px solid var(--orange);background:#fffaf5}
 .priority-card.greenline{border-left:4px solid var(--green);background:#f5fdf9}
+.priority-card.blueline{border-left:4px solid var(--blue);background:#f5f8ff}
 .action-pill{display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;background:var(--blue-light);color:var(--navy2);border:1px solid #bfdbfe}
 .action-pill.high{background:var(--red-light);color:#9c2634;border-color:#fca5a5}
 .action-pill.mid{background:var(--yellow-light);color:#78350f;border-color:#fde68a}
 .action-pill.ok{background:var(--green-light);color:#065f46;border-color:#a7f3d0}
 .action-table-wrap{margin-top:12px}
+.action-plan-card{overflow:hidden}
+.action-summary-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.action-execution-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.action-step-card{border:1px solid var(--border);border-radius:10px;background:linear-gradient(180deg,#fff,#f8fbff);padding:12px;min-width:0;border-left:4px solid var(--blue)}
+.action-step-card.high{border-left-color:var(--red);background:#fff7f7}
+.action-step-card.mid{border-left-color:var(--orange);background:#fffaf5}
+.action-step-card.ok{border-left-color:var(--green);background:#f5fdf9}
+.action-step-card h3{margin:0 0 7px;font-size:11px;color:#10213a;letter-spacing:.07em;text-transform:uppercase}
+.action-step-card ul{margin:0;padding-left:17px;display:grid;gap:5px;color:#475569;font-size:12px;line-height:1.35;font-weight:600}
+.action-plan-table{min-width:980px;font-size:12px}
+.action-plan-table th{font-size:8.8px;padding:9px 8px;white-space:normal;text-align:left}
+.action-plan-table td{padding:9px 8px;vertical-align:top;white-space:normal;line-height:1.35}
+.action-plan-table td:nth-child(1),.action-plan-table td:nth-child(2){white-space:nowrap}
+.action-plan-table td:nth-child(5),.action-plan-table td:nth-child(6),.action-plan-table td:nth-child(7){min-width:150px}
+.action-metric{display:inline-flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-weight:800;color:#10213a;background:#eef5ff;border:1px solid #bfdbfe;border-radius:999px;padding:3px 7px;font-size:10px;margin-top:4px}
+@media(max-width:1100px){.action-summary-grid,.action-execution-grid{grid-template-columns:1fr}.action-plan-table{min-width:980px}}
 
 /* ─── MOBILE TECH CARDS ─── */
 .mobile-tech-cards{display:none;margin-top:10px;gap:8px;flex-direction:column}
@@ -1585,10 +1602,20 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   min-width:0;
   max-width:100%;
 }
+#secPerformanceTecnico .section-title-line{
+  justify-content:center!important;
+  text-align:center!important;
+  margin-bottom:8px!important;
+}
+#secPerformanceTecnico .section-title-line h2{
+  width:100%;
+  font-size:15px!important;
+  letter-spacing:.09em!important;
+}
 #secPerformanceTecnico .performance-date-filter{
   display:flex;
   align-items:end;
-  justify-content:flex-end;
+  justify-content:center;
   gap:8px;
   flex-wrap:wrap;
   margin:8px 0 12px;
@@ -1614,7 +1641,17 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   font-size:10px;
 }
 @media(max-width:720px){
-  #secPerformanceTecnico .performance-date-filter{justify-content:flex-start}
+  #secPerformanceTecnico .section-title-line{
+  justify-content:center!important;
+  text-align:center!important;
+  margin-bottom:8px!important;
+}
+#secPerformanceTecnico .section-title-line h2{
+  width:100%;
+  font-size:15px!important;
+  letter-spacing:.09em!important;
+}
+#secPerformanceTecnico .performance-date-filter{justify-content:flex-start}
   #secPerformanceTecnico .performance-date-filter label{width:calc(50% - 6px)}
   #secPerformanceTecnico .performance-date-filter input[type=date]{width:100%}
 }
@@ -1688,6 +1725,17 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 #secPerformanceTecnico table td:nth-child(10){width:8.5%}
 #secPerformanceTecnico table th:nth-child(11),
 #secPerformanceTecnico table td:nth-child(11){width:17.5%}
+#secPerformanceTecnico .performance-total-row td{
+  background:#eef5ff!important;
+  border-top:2px solid var(--blue)!important;
+  color:#10213a!important;
+  font-weight:900!important;
+}
+#secPerformanceTecnico .performance-total-row .meta-vt,
+#secPerformanceTecnico .performance-total-row .badge{
+  font-size:9px!important;
+  font-weight:900!important;
+}
 @media(max-width:1180px){
   #secPerformanceTecnico table{font-size:10px}
   #secPerformanceTecnico thead th{font-size:8.1px;padding:7px 4px}
@@ -1810,7 +1858,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   align-items:center;
   gap:8px;
   flex-wrap:wrap;
-  justify-content:flex-end;
+  justify-content:center;
 }
 #tecnicoCertificado .certificado-ciclo-controle label{
   display:flex;
@@ -2032,12 +2080,10 @@ button:hover,.btn:hover{transform:translateY(-1px)}
     <div class="card plantoes-folga-card">
       <div class="section-title-line">
         <h2>Performance por Técnico</h2>
-        <span class="section-caption">Desktop em tabela · celular em cards</span>
       </div>
       <div class="performance-date-filter" aria-label="Filtro de data da Performance por Técnico">
         <label>De<input type="date" id="filtroPerformanceDataIni"></label>
         <label>Até<input type="date" id="filtroPerformanceDataFim"></label>
-        <button id="btnPerformanceCiclo" class="secondary" type="button">20 a 20</button>
         <button id="btnPerformanceLimparData" class="secondary" type="button">Limpar data</button>
       </div>
       <div class="table-wrap">
@@ -2053,6 +2099,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
       </div>
       <div id="cardsTecnicosMobile" class="mobile-tech-cards"><div class="empty">Carregue a base para visualizar.</div></div>
     </div>
+
   </section>
 
   <!-- DESTAQUE POSITIVO -->
@@ -2132,20 +2179,20 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 
 <!-- PLANO DE AÇÃO -->
 <section id="acao" class="tab-panel">
-  <div class="grid2">
-    <div class="card">
+  <div class="grid">
+    <div class="card action-plan-card">
       <div class="section-title-line">
-        <h2>Plano de Ação Automático</h2>
-        <span class="section-caption">Prioridade, motivo e ação recomendada</span>
+        <h2>Plano de Ação Operacional</h2>
+        <span class="section-caption">Diagnóstico, prazo, meta de saída e responsável</span>
       </div>
-      <div id="acaoPrioridades" class="action-priority-grid">
+      <div id="acaoPrioridades" class="action-priority-grid action-summary-grid">
         <div class="priority-card"><strong>Aguardando base</strong><span>Carregue a planilha para gerar prioridades.</span></div>
       </div>
-      <div id="planoAcao" class="alert-list"><div class="empty">Carregue uma base para gerar recomendações.</div></div>
+      <div id="planoAcao" class="action-execution-grid"><div class="empty">Carregue uma base para gerar recomendações.</div></div>
       <div class="table-wrap action-table-wrap">
-        <table>
-          <thead><tr><th>Prioridade</th><th>Técnico</th><th>Indicador</th><th>Motivo</th><th>Ação recomendada</th></tr></thead>
-          <tbody id="tabelaPlanoAcao"><tr><td colspan="5"><div class="empty">Aguardando base.</div></td></tr></tbody>
+        <table class="action-plan-table">
+          <thead><tr><th>Prioridade</th><th>Prazo</th><th>Responsável</th><th>Indicador</th><th>Diagnóstico</th><th>Meta de saída</th><th>Ação recomendada</th></tr></thead>
+          <tbody id="tabelaPlanoAcao"><tr><td colspan="7"><div class="empty">Aguardando base.</div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -2867,16 +2914,30 @@ function dataDateDeOrdem(ts){
   const d=new Date(Number(ts)||0);
   return isNaN(d.getTime())?null:d;
 }
+function mesAnoCompetencia(d){
+  const meses=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const ref=new Date(d.getFullYear(),d.getMonth()+(d.getDate()>20?1:0),1);
+  return `${meses[ref.getMonth()]}/${ref.getFullYear()}`;
+}
+function intervaloCompetenciaIndicador(d){
+  const ano=d.getFullYear();
+  const mes=d.getMonth();
+  const dia=d.getDate();
+  const inicio=dia<=20?new Date(ano,mes-1,20):new Date(ano,mes,21);
+  const fim=dia<=20?new Date(ano,mes,20):new Date(ano,mes+1,20);
+  return {inicio:dataISODeDate(inicio),fim:dataISODeDate(fim),competencia:mesAnoCompetencia(d)};
+}
 function intervaloCiclo20PorBase(rows){
   const datas=(Array.isArray(rows)?rows:[]).map(r=>dataParaOrdem(dataReferenciaPerformance(r))).filter(Boolean);
   if(!datas.length) return null;
-  const ref=new Date(Math.max(...datas));
-  const ano=ref.getFullYear();
-  const mes=ref.getMonth();
-  const dia=ref.getDate();
-  const inicio=dia>=20?new Date(ano,mes,20):new Date(ano,mes-1,20);
-  const fim=dia>=20?new Date(ano,mes+1,20):new Date(ano,mes,20);
-  return {inicio:dataISODeDate(inicio),fim:dataISODeDate(fim)};
+  return intervaloCompetenciaIndicador(new Date(Math.max(...datas)));
+}
+function competenciaFiltroPerformance(){
+  const ini=dataInputParaOrdem($("filtroPerformanceDataIni")?.value||"");
+  const fim=dataInputParaOrdem($("filtroPerformanceDataFim")?.value||"");
+  const ts=ini||fim;
+  if(!ts) return "";
+  return mesAnoCompetencia(new Date(ts));
 }
 
 const TECNICOS_NOMES={
@@ -2898,7 +2959,7 @@ function statusTecnico(t){
   const revAcompanhamento=(Number(t.revPct)||0)>LIMITE_ACOMP_REVISITA;
   const tec1Acompanhamento=(Number(t.tec1Pct)||0)<LIMITE_ACOMP_TEC1;
   if(revAcompanhamento||tec1Acompanhamento) return ["Em acompanhamento","yellow"];
-  return ["Dentro da meta","green"];
+  return ["Certificado","green"];
 }
 
 const META_REVISITA=7;
@@ -2931,7 +2992,7 @@ function celulaMetaRevisitaVT(qtd){
 function margemRevisitaTecnico(t){
   const total=Number(t?.total)||0;
   const rev=Number(t?.revisitas)||0;
-  const limite=(Number(LIMITE_ACOMP_REVISITA)||0)/100;
+  const limite=(Number(META_REVISITA)||0)/100;
   if(total<=0||limite<=0||limite>=1) return 0;
   const margem=Math.floor(((limite*total)-rev)/(1-limite));
   return Math.max(0,margem);
@@ -2939,7 +3000,7 @@ function margemRevisitaTecnico(t){
 function celulaMargemRevisita(t){
   const margem=margemRevisitaTecnico(t);
   const classe=margem>0?"meta-vt":"meta-vt need";
-  return `<span class="${classe}">${margem} rev.</span>`;
+  return `<span class="${classe}" title="Margem calculada pelo teto de ${pct(META_REVISITA)} na competência filtrada">${margem} rev.</span>`;
 }
 function celulaMetaVT(qtd){
   qtd=Number(qtd)||0;
@@ -3091,7 +3152,7 @@ function processarResumo(rows){
   const totalOk=arr.reduce((a,t)=>a+t.tecOk,0);
   const totalTecBase=arr.reduce((a,t)=>a+t.tecBase,0);
   const arrNode=Object.entries(nodes).map(([node,qtd])=>{return {node,qtd}}).sort((a,b)=>b.qtd-a.qtd);
-  return {arr,arrNode,revisitas,tec1ForaPadrao,totalProducao,totalRev,totalOk,totalTecBase,baseLen:rows.length};
+  return {arr,arrNode,revisitas,tec1ForaPadrao,totalProducao,totalRev,totalOk,totalTecBase,baseLen:rows.length,sourceRows:[...rows]};
 }
 
 function renderBars(id,items,labelKey,valueKey,suffix){
@@ -3140,7 +3201,132 @@ function renderRankingOperacional(summary){
 }
 
 function renderCardsMobile(summary){
-  const el=$("cardsTecnicosMobile");if(!el) return;
+  renderCardsMobilePerformance("cardsTecnicosMobile",summary);
+}
+
+function classePrioridadeAcao(nivel){
+  if(nivel==="Crítica"||nivel==="Alta") return "high";
+  if(nivel==="Média") return "mid";
+  return "ok";
+}
+function prazoPrioridadeAcao(nivel){
+  if(nivel==="Crítica") return "Hoje";
+  if(nivel==="Alta") return "24h";
+  if(nivel==="Média") return "48h";
+  return "Semanal";
+}
+function montarPlanoAcaoItens(summary){
+  const {arr,arrNode}=summary;
+  const itens=[];
+  const porRev=[...arr].filter(t=>Number(t.revPct)>LIMITE_ACOMP_REVISITA).sort((a,b)=>b.revPct-a.revPct||b.revisitas-a.revisitas);
+  const porTec=[...arr].filter(t=>Number(t.tec1Pct)<LIMITE_ACOMP_TEC1).sort((a,b)=>a.tec1Pct-b.tec1Pct||b.tecFora-a.tecFora);
+  const produtivos=arr.filter(t=>Number(t.producao)>0).sort((a,b)=>a.producao-b.producao);
+  const medianaProd=produtivos.length?produtivos[Math.floor(produtivos.length/2)].producao:0;
+
+  porRev.slice(0,6).forEach(t=>{
+    const nivel=t.revPct>=META_REVISITA?"Crítica":"Alta";
+    const semRetorno=Number(t.vtMetaRevisita)||0;
+    itens.push({
+      nivel,classe:classePrioridadeAcao(nivel),prazo:prazoPrioridadeAcao(nivel),responsavel:t.nome,indicador:"Revisita 10d",
+      diagnostico:`${pct(t.revPct)} de revisita, ${t.revisitas} retorno(s) em ${t.contratosExecutados} contrato(s).`,
+      meta:`Reduzir para até ${pct(LIMITE_ACOMP_REVISITA)}${semRetorno?` com ${semRetorno} VT sem retorno`:""}.`,
+      acao:"Revisar contratos reincidentes, validar causa raiz por serviço/node, conferir baixa e orientar técnico antes das próximas rotas.",
+      score:t.revPct
+    });
+  });
+
+  porTec.slice(0,6).forEach(t=>{
+    const nivel=t.tec1Pct<META_TEC1?"Alta":"Média";
+    const vtMeta=Number(t.vtMetaTec1)||0;
+    itens.push({
+      nivel,classe:classePrioridadeAcao(nivel),prazo:prazoPrioridadeAcao(nivel),responsavel:t.nome,indicador:"TEC1 30d",
+      diagnostico:`${pct(t.tec1Pct)} de TEC1, ${t.tecFora} OS fora da janela.`,
+      meta:`Chegar a ${pct(LIMITE_ACOMP_TEC1)}${vtMeta?` com ${vtMeta} VT dentro do padrão`:""}.`,
+      acao:"Auditar agenda x baixa, identificar horários estourados, ajustar ordem da rota e validar motivos de encerramento fora do prazo.",
+      score:100-t.tec1Pct
+    });
+  });
+
+  if(arrNode[0]){
+    itens.push({
+      nivel:"Média",classe:"mid",prazo:"48h",responsavel:"Equipe",indicador:"Node crítico",
+      diagnostico:`${arrNode[0].node} concentra ${arrNode[0].qtd} ocorrência(s) no filtro atual.`,
+      meta:"Reduzir concentração e separar causa técnica, rota ou recorrência de contrato.",
+      acao:"Abrir amostra dos contratos do node, comparar serviço executado, motivo de retorno e técnico responsável; definir ajuste de rota ou orientação técnica.",
+      score:arrNode[0].qtd
+    });
+  }
+
+  if(produtivos.length&&medianaProd>0){
+    const baixo=produtivos[0];
+    if(baixo.producao<medianaProd*.75){
+      itens.push({
+        nivel:"Baixa",classe:"ok",prazo:"Semanal",responsavel:baixo.nome,indicador:"Produção",
+        diagnostico:`${baixo.producao} produção, abaixo da mediana da equipe (${medianaProd}).`,
+        meta:"Aproximar produção da mediana sem piorar revisita e TEC1.",
+        acao:"Verificar carga recebida, deslocamento, indisponibilidade, apoio em campo e redistribuição de OS quando necessário.",
+        score:medianaProd-baixo.producao
+      });
+    }
+  }
+
+  return itens.sort((a,b)=>{
+    const peso={"Crítica":4,"Alta":3,"Média":2,"Baixa":1};
+    return (peso[b.nivel]||0)-(peso[a.nivel]||0)||(Number(b.score)||0)-(Number(a.score)||0);
+  });
+}
+function renderResumoPlanoAcao(summary,itens){
+  const grid=$("acaoPrioridades");
+  if(!grid) return;
+  const {arr}=summary;
+  if(!arr.length){
+    grid.innerHTML='<div class="priority-card"><strong>Aguardando base</strong><span>Carregue a planilha para gerar prioridades.</span></div>';
+    return;
+  }
+  const criticas=itens.filter(i=>i.nivel==="Crítica"||i.nivel==="Alta").length;
+  const medias=itens.filter(i=>i.nivel==="Média").length;
+  const baixas=itens.filter(i=>i.nivel==="Baixa").length;
+  const dentro=arr.filter(t=>!(t.revPct>LIMITE_ACOMP_REVISITA||t.tec1Pct<LIMITE_ACOMP_TEC1)).length;
+  const piorRev=[...arr].sort((a,b)=>b.revPct-a.revPct)[0];
+  grid.innerHTML=`<div class="priority-card redline"><strong>${criticas} ação crítica/alta</strong><span>Foco em revisita e TEC1 fora do limite operacional.</span></div>
+    <div class="priority-card orangeline"><strong>${medias} ação média</strong><span>Correções de node, agenda e causa recorrente.</span></div>
+    <div class="priority-card blueline"><strong>${baixas} ajuste de produção</strong><span>Checar carga, rota e disponibilidade.</span></div>
+    <div class="priority-card greenline"><strong>${dentro}/${arr.length} dentro da meta</strong><span>Técnicos sem alerta de revisita ou TEC1.</span></div>
+    <div class="priority-card"><strong>${piorRev?`${piorRev.nome} ${pct(piorRev.revPct)}`:"Sem dados"}</strong><span>Maior ponto de atenção em revisita no filtro atual.</span></div>`;
+}
+function renderPlanoAcaoDetalhado(summary){
+  const itens=montarPlanoAcaoItens(summary);
+  renderResumoPlanoAcao(summary,itens);
+  const tbody=$("tabelaPlanoAcao");
+  if(tbody){
+    tbody.innerHTML=itens.length?itens.map(p=>`<tr>
+      <td><span class="action-pill ${p.classe}">${p.nivel}</span></td>
+      <td><strong>${p.prazo}</strong></td>
+      <td><strong>${p.responsavel}</strong></td>
+      <td>${p.indicador}</td>
+      <td>${p.diagnostico}</td>
+      <td>${p.meta}</td>
+      <td>${p.acao}</td>
+    </tr>`).join(""):'<tr><td colspan="7"><div class="empty">Nenhuma ação crítica no filtro atual.</div></td></tr>';
+  }
+}
+function linhasTabelaPerformance(arr){
+  return arr.map(t=>{const [lab,cor]=statusTecnico(t);return `<tr>
+    <td>${celulaTecnico(t.login)}</td>
+    <td>${t.contratosExecutados}</td><td>${num1(t.mediaContratos)}</td><td>${t.revisitas}</td><td>${pct(t.revPct)}</td>
+    <td>${celulaMetaRevisitaVT(t.vtMetaRevisita)}</td>
+    <td>${celulaMargemRevisita(t)}</td>
+    <td>${t.tecFora}</td><td>${pct(t.tec1Pct)}</td>
+    <td>${celulaMetaVT(t.vtMetaTec1)}</td>
+    <td><span class="badge ${cor}">${lab}</span></td>
+  </tr>`}).join("");
+}
+function renderTabelaPerformance(id,arr,mensagemVazio="Sem dados para os filtros selecionados."){
+  const el=$(id);if(!el) return;
+  el.innerHTML=arr.length?(linhasTabelaPerformance(arr)+linhaMediaPerformance(arr)):`<tr><td colspan="11"><div class="empty">${mensagemVazio}</div></td></tr>`;
+}
+function renderCardsMobilePerformance(id,summary){
+  const el=$(id);if(!el) return;
   const {arr}=summary;
   el.innerHTML=arr.length?arr.map(t=>{const [lab,cor]=statusTecnico(t);return `<div class="tech-mobile-card">
     <div class="tech-mobile-head"><div>${celulaTecnico(t.login)}</div><span class="badge ${cor}">${lab}</span></div>
@@ -3156,33 +3342,37 @@ function renderCardsMobile(summary){
     </div>
   </div>`}).join(""):'<div class="empty">Sem dados para os filtros selecionados.</div>';
 }
-
-function renderPlanoAcaoDetalhado(summary){
-  const {arr,arrNode}=summary;
-  const prioridades=[];
-  const critRev=[...arr].filter(t=>t.revPct>LIMITE_ACOMP_REVISITA).sort((a,b)=>b.revPct-a.revPct);
-  const critTec=[...arr].filter(t=>t.tec1Pct<LIMITE_ACOMP_TEC1).sort((a,b)=>a.tec1Pct-b.tec1Pct);
-  critRev.slice(0,6).forEach(t=>prioridades.push({nivel:"Alta",classe:"high",tecnico:t.nome,indicador:"Revisita 10d",motivo:`${pct(t.revPct)} acima de 6%`,acao:`Revisar contratos reincidentes e buscar ${t.vtMetaRevisita||0} VT sem revisita.`}));
-  critTec.slice(0,6).forEach(t=>prioridades.push({nivel:"Média",classe:"mid",tecnico:t.nome,indicador:"TEC1 30d",motivo:`${pct(t.tec1Pct)} abaixo de 96%`,acao:`Auditar estouro de horários programados e buscar ${t.vtMetaTec1||0} VT dentro do padrão.`}));
-  if(arrNode[0]) prioridades.push({nivel:"Média",classe:"mid",tecnico:"Equipe",indicador:"Node",motivo:`${arrNode[0].node} com ${arrNode[0].qtd} ocorrências`,acao:"Verificar concentração de retorno, rota, agenda e causas por região."});
-
-  const grid=$("acaoPrioridades");
-  if(grid){
-    if(!arr.length){
-      grid.innerHTML='<div class="priority-card"><strong>Aguardando base</strong><span>Carregue a planilha para gerar prioridades.</span></div>';
-    }else{
-      const alta=prioridades.filter(p=>p.classe==="high").length;
-      const media=prioridades.filter(p=>p.classe==="mid").length;
-      const ok=arr.length-alta;
-      grid.innerHTML=`<div class="priority-card redline"><strong>${alta} prioridade alta</strong><span>Foco em revisita acima de 6%.</span></div>
-      <div class="priority-card orangeline"><strong>${media} prioridade média</strong><span>Foco em TEC1, node e agenda.</span></div>
-      <div class="priority-card greenline"><strong>${Math.max(0,ok)} dentro/monitorado</strong><span>Técnicos sem alerta de revisita crítica.</span></div>`;
-    }
-  }
-  const tbody=$("tabelaPlanoAcao");
-  if(tbody){
-    tbody.innerHTML=prioridades.length?prioridades.map(p=>`<tr><td><span class="action-pill ${p.classe}">${p.nivel}</span></td><td><strong>${p.tecnico}</strong></td><td>${p.indicador}</td><td>${p.motivo}</td><td>${p.acao}</td></tr>`).join(""):'<tr><td colspan="5"><div class="empty">Nenhuma ação crítica no filtro atual.</div></td></tr>';
-  }
+function linhaMediaPerformance(arr){
+  if(!Array.isArray(arr)||!arr.length) return "";
+  const qtd=arr.length;
+  const soma=(campo)=>arr.reduce((s,t)=>s+(Number(t?.[campo])||0),0);
+  const totalContratos=soma("contratosExecutados");
+  const totalRev=soma("revisitas");
+  const totalTecOk=soma("tecOk");
+  const totalTecBase=soma("tecBase");
+  const mediaContratos=totalContratos/qtd;
+  const mediaProd=soma("mediaContratos")/qtd;
+  const mediaRevQtd=totalRev/qtd;
+  const revGeral=totalContratos?totalRev/totalContratos*100:0;
+  const mediaMetaRev=arr.reduce((s,t)=>s+(Number(t.vtMetaRevisita)||0),0)/qtd;
+  const mediaMargem=arr.reduce((s,t)=>s+margemRevisitaTecnico(t),0)/qtd;
+  const mediaFora=soma("tecFora")/qtd;
+  const tec1Geral=totalTecBase?totalTecOk/totalTecBase*100:0;
+  const mediaMetaTec1=arr.reduce((s,t)=>s+(Number(t.vtMetaTec1)||0),0)/qtd;
+  const certificados=arr.filter(t=>!(Number(t.revPct)>LIMITE_ACOMP_REVISITA||Number(t.tec1Pct)<LIMITE_ACOMP_TEC1)).length;
+  return `<tr class="performance-total-row">
+    <td><strong>Média geral</strong><div class="tech-code">${qtd} técnicos</div></td>
+    <td>${num1(mediaContratos)}</td>
+    <td>${num1(mediaProd)}</td>
+    <td>${num1(mediaRevQtd)}</td>
+    <td>${pct(revGeral)}</td>
+    <td>${mediaMetaRev>0?`<span class="meta-vt need">${num1(mediaMetaRev)} VT</span>`:""}</td>
+    <td><span class="meta-vt">${num1(mediaMargem)} rev.</span></td>
+    <td>${num1(mediaFora)}</td>
+    <td>${pct(tec1Geral)}</td>
+    <td>${mediaMetaTec1>0?`<span class="meta-vt need">${num1(mediaMetaTec1)} VT</span>`:`<span class="meta-vt">Na meta</span>`}</td>
+    <td><span class="badge green">${certificados}/${qtd} certificado</span></td>
+  </tr>`;
 }
 
 function renderDashboard(summary){
@@ -3199,15 +3389,7 @@ function renderDashboard(summary){
   if($("balaoRevValor")) $("balaoRevValor").textContent=totalRev;
   if($("balaoTec1Valor")) $("balaoTec1Valor").textContent=(tec1ForaPadrao||[]).length;
 
-  $("tabelaTecnicos").innerHTML=arr.length?arr.map(t=>{const [lab,cor]=statusTecnico(t);return `<tr>
-    <td>${celulaTecnico(t.login)}</td>
-    <td>${t.contratosExecutados}</td><td>${num1(t.mediaContratos)}</td><td>${t.revisitas}</td><td>${pct(t.revPct)}</td>
-    <td>${celulaMetaRevisitaVT(t.vtMetaRevisita)}</td>
-    <td>${celulaMargemRevisita(t)}</td>
-    <td>${t.tecFora}</td><td>${pct(t.tec1Pct)}</td>
-    <td>${celulaMetaVT(t.vtMetaTec1)}</td>
-    <td><span class="badge ${cor}">${lab}</span></td>
-  </tr>`}).join(""):'<tr><td colspan="11"><div class="empty">Sem dados para os filtros selecionados.</div></td></tr>';
+  renderTabelaPerformance("tabelaTecnicos",arr);
 
   const secRankingNode=$("secRankingNode");
   const nodeFiltrado=$("filtroNode")?.value||"";
@@ -3323,19 +3505,23 @@ function renderAlertas(summary){
 }
 
 function renderPlanoAcao(summary){
-  const {arr,arrNode}=summary;
-  const critRev=arr.filter(t=>t.revPct>LIMITE_ACOMP_REVISITA).sort((a,b)=>b.revPct-a.revPct);
-  const critTec=arr.filter(t=>t.tec1Pct<LIMITE_ACOMP_TEC1).sort((a,b)=>a.tec1Pct-b.tec1Pct);
-  const baixoVolume=arr.filter(t=>t.producao>0).sort((a,b)=>a.producao-b.producao)[0];
-  const itens=[];
-  if(critRev[0]) itens.push(`<div class="alert redline"><strong>1. Revisita 10d:</strong> acompanhar técnicos acima de 6%, especialmente <strong>${critRev[0].nome}</strong>, revisar contratos que voltaram em até 10 dias e validar causa raiz.</div>`);
-  if(critTec[0]) itens.push(`<div class="alert redline"><strong>2. TEC1 30d:</strong> auditar baixas fora do horário programado do técnico <strong>${critTec[0].nome}</strong>.</div>`);
-  if(arrNode[0]) itens.push(`<div class="alert orangeline"><strong>3. Node crítico:</strong> verificar recorrência no node <strong>${arrNode[0].node}</strong>.</div>`);
-  if(baixoVolume) itens.push(`<div class="alert blueline"><strong>4. Produção:</strong> conferir distribuição de carga; menor produção atual: <strong>${baixoVolume.nome}</strong> com ${baixoVolume.producao}.</div>`);
-  itens.push(`<div class="alert greenline"><strong>5. Rotina:</strong> manter acompanhamento diário de produção, revisita 10d, TEC1 30d e nodes.</div>`);
-  $("planoAcao").innerHTML=itens.join("");
+  const el=$("planoAcao");
+  if(!el) return;
+  const itens=montarPlanoAcaoItens(summary);
+  if(!summary.arr.length){
+    el.innerHTML='<div class="empty">Carregue uma base para gerar recomendações.</div>';
+    return;
+  }
+  const porPrazo={
+    hoje:itens.filter(i=>i.prazo==="Hoje"),
+    curto:itens.filter(i=>i.prazo==="24h"||i.prazo==="48h"),
+    semana:itens.filter(i=>i.prazo==="Semanal")
+  };
+  const lista=(arr,msg)=>arr.length?arr.slice(0,4).map(i=>`<li><strong>${i.responsavel}</strong>: ${i.indicador} - ${i.meta}</li>`).join(""):`<li>${msg}</li>`;
+  el.innerHTML=`<div class="action-step-card high"><h3>Hoje</h3><ul>${lista(porPrazo.hoje,"Sem bloqueio crítico para hoje.")}</ul></div>
+    <div class="action-step-card mid"><h3>Próximas 48h</h3><ul>${lista(porPrazo.curto,"Monitorar indicadores e manter rotina de conferência.")}</ul></div>
+    <div class="action-step-card ok"><h3>Rotina semanal</h3><ul>${lista(porPrazo.semana,"Revisar produção, distribuição de carga e evolução dos técnicos dentro da meta.")}</ul></div>`;
 }
-
 function abrirModalTecnicos(atualizarLista=true){
   const modal=$("modalTecnicos");
   const conteudo=$("modalTecnicosConteudo");
@@ -4618,8 +4804,10 @@ async function carregarBase(){
 function mensagemFiltrosAplicados(qtd){
   const ini=$("filtroPerformanceDataIni")?.value||"";
   const fim=$("filtroPerformanceDataFim")?.value||"";
+  const competencia=competenciaFiltroPerformance();
   const partes=[];
   if(ini||fim) partes.push(`Período: <strong>${ini||"início"}</strong> até <strong>${fim||"fim"}</strong>`);
+  if(competencia) partes.push(`Competência do indicador: <strong>${competencia}</strong>`);
   partes.push(`Registros no filtro: <strong>${Number(qtd)||0}</strong>`);
   return `✅ Filtros aplicados. ${partes.join(" · ")}.`;
 }
@@ -4667,7 +4855,7 @@ function limparTudo(){
   if($("destaquePositivo")) $("destaquePositivo").innerHTML='<div class="empty">Aguardando dados.</div>';
   $("planoAcao").innerHTML='<div class="empty">Carregue uma base para gerar recomendações.</div>';
   if($("acaoPrioridades")) $("acaoPrioridades").innerHTML='<div class="priority-card"><strong>Aguardando base</strong><span>Carregue a planilha para gerar prioridades.</span></div>';
-  if($("tabelaPlanoAcao")) $("tabelaPlanoAcao").innerHTML='<tr><td colspan="5"><div class="empty">Aguardando base.</div></td></tr>';
+  if($("tabelaPlanoAcao")) $("tabelaPlanoAcao").innerHTML='<tr><td colspan="7"><div class="empty">Aguardando base.</div></td></tr>';
   $("validacaoBase").innerHTML='<div class="empty">Aguardando importação.</div>';
 }
 
@@ -5492,7 +5680,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   on("btnCarregar","click",carregarBase);
   on("btnLimpar","click",limparTudo);
   on("btnCarregarUltima","click",carregarUltimaBase);
-  on("btnPerformanceCiclo","click",aplicarCicloPerformance20);
   on("btnPerformanceLimparData","click",limparDataPerformance);
   on("filtroPerformanceDataIni","change",reaplicarFiltros);
   on("filtroPerformanceDataFim","change",reaplicarFiltros);
@@ -6816,6 +7003,23 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
