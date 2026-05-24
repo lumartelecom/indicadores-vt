@@ -2250,7 +2250,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
         <div class="dias-kpi dias-kpi-principal dias-kpi-meta"><span>Meta mensal mínima</span><input id="diasMetaMensal" class="dias-meta-input" type="number" min="0" step="1" value="175" aria-label="Meta mensal mínima"></div>
         <div class="dias-kpi dias-kpi-principal dias-kpi-realizado"><span>Produção acumulada</span><strong id="diasTotalFeito">-</strong></div>
         <div class="dias-kpi dias-kpi-principal dias-kpi-pendente"><span>Saldo para meta</span><strong id="diasFaltaMeta">-</strong></div>
-        <button class="dias-kpi dias-kpi-operacao dias-kpi-click capacidade-kpi dias-kpi-capacidade" id="cardCapacidadeDias" type="button" aria-label="Ver dias disponíveis para produção"><span>Dias produtivos disponíveis</span><strong id="diasUteisRestantes">-</strong></button>
+        <button class="dias-kpi dias-kpi-operacao dias-kpi-click capacidade-kpi dias-kpi-capacidade" id="cardCapacidadeDias" type="button" aria-label="Ver capacidade disponível da equipe"><span>Capacidade equipe</span><strong id="diasUteisRestantes">-</strong></button>
         <div class="dias-kpi dias-kpi-operacao dias-kpi-equipe"><span>Equipe ativa</span><strong id="diasMetaDia">7</strong></div>
         <div class="dias-kpi dias-kpi-contexto dias-kpi-competencia"><span>Competência analisada</span><strong id="diasCompetencia">-</strong><small id="diasCompetenciaSub">Mês selecionado</small></div>
       </div>
@@ -5055,6 +5055,31 @@ function obterMesPlantaoDias(ano,mes){
     return y===ano && (m-1)===mes;
   }))||null;
 }
+function tecnicoFeriasNoDiaDias(tec,iso){
+  if(!tec || tec.status!=="Férias") return false;
+  if(!tec.start && !tec.end) return true;
+  const ini=tec.start||"0000-01-01";
+  const fim=tec.end||"9999-12-31";
+  return iso>=ini && iso<=fim;
+}
+function qtdTecnicosFeriasDiaDias(ano,mes,dia){
+  const estado=lerEstadoPlantoesDias();
+  const iso=dataISO(ano,mes,dia);
+  const tecnicos=estado?.technicians||[];
+  return tecnicos.filter(t=>tecnicoFeriasNoDiaDias(t,iso)).length;
+}
+function equipeAtivaDiaDias(ano,mes,dia){
+  const base=Number(DIAS_SHEET_CONFIG.loginsAtivos||7);
+  return Math.max(0,base-qtdTecnicosFeriasDiaDias(ano,mes,dia));
+}
+function equipeAtivaMesDias(mesInfo){
+  const ano=DIAS_SHEET_CONFIG.anoPadrao;
+  const mes=Number(mesInfo?.num);
+  const ultimo=new Date(ano,mes+1,0).getDate();
+  let menor=Number(DIAS_SHEET_CONFIG.loginsAtivos||7);
+  for(let dia=1;dia<=ultimo;dia++) menor=Math.min(menor,equipeAtivaDiaDias(ano,mes,dia));
+  return menor;
+}
 function rowPlantaoPorDataDias(ano,mes,dia){
   const month=obterMesPlantaoDias(ano,mes);
   if(!month) return null;
@@ -5208,7 +5233,7 @@ function regraCalendarioDias(mesInfo){
 function capacidadeDiaDias(ano,mes,dia,mesInfo){
   const d=new Date(ano,mes,dia);
   const dow=d.getDay();
-  const loginsAtivos=Number(DIAS_SHEET_CONFIG.loginsAtivos||7);
+  const loginsAtivos=equipeAtivaDiaDias(ano,mes,dia);
   const rowPlantao=rowPlantaoPorDataDias(ano,mes,dia);
   const qtdPlantao=qtdTecnicosPlantaoDias(rowPlantao);
   const folgasNoDia=qtdFolgasPlantaoDiaDias(ano,mes,dia);
@@ -5216,7 +5241,7 @@ function capacidadeDiaDias(ano,mes,dia,mesInfo){
 
   // Capacidade em dias = técnicos disponíveis para produção.
   // Domingo/feriado só entra quando existe plantão, contando os técnicos escalados.
-  // Em dia normal, técnicos em plantão são retirados da capacidade produtiva normal.
+  // Em dia normal, técnicos em plantão, folga e férias são retirados da capacidade produtiva normal.
   if(dow===0 || feriado) return qtdPlantao;
   if(dow>=1 && dow<=6) return Math.max(0,loginsAtivos-folgasNoDia-qtdPlantao);
   return 0;
@@ -5588,7 +5613,7 @@ function renderDiasTrabalhados(dados,mesInfo,fonte){
   setDiasText("diasTotalFeito",formatNumeroDias(dados.totalJaFeito,0));
   setDiasText("diasFaltaMeta",formatNumeroDias(dados.falta,0));
   setDiasText("diasUteisRestantes",formatNumeroDias(dados.diasUteis,0));
-  setDiasText("diasMetaDia",String(DIAS_SHEET_CONFIG.loginsAtivos||7));
+  setDiasText("diasMetaDia",String(equipeAtivaMesDias(mesInfo)));
   setDiasText("diasCompetencia",`${mesInfo.label}-26`);
   setDiasText("diasCompetenciaSub",`${dataBR(inicio)} a ${dataBR(fim)}`);
   const barra=$("diasProgresso");
@@ -5689,6 +5714,7 @@ function atualizarCardCapacidadeSelecionada(){
   capacidadeMesSelecionado=Number(mesInfo.num);
   const capacidade=detalhesCapacidadeMes(mesInfo,inicioCapacidadeSelecionadaDias(mesInfo));
   setDiasText("diasUteisRestantes",formatNumeroDias(capacidade.total||0,0));
+  setDiasText("diasMetaDia",String(equipeAtivaMesDias(mesInfo)));
 }
 function preencherSelectCapacidadeInline(){
   const sel=$("capacidadeMesSelectTopo");
