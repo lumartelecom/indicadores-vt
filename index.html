@@ -370,20 +370,28 @@ tr.contrato-encontrado td{background:#fff2b8!important;box-shadow:inset 4px 0 0 
 /* Resumo da Meta ocupa toda a largura da aba Dias */
 #dias .dias-hero>.card{width:100%;max-width:100%;min-width:0}
 #dias .dias-hero .section-title-line{align-items:center}
-.dias-kpi{background:linear-gradient(180deg,#fff,#f8fbff);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:10px;padding:10px 11px;box-shadow:var(--shadow-sm);min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px}
+.dias-kpi{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--blue);border-radius:var(--radius-lg);padding:10px 11px;box-shadow:var(--shadow-sm);min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}
+.dias-kpi:after{content:"";position:absolute;right:-28px;top:-28px;width:72px;height:72px;border-radius:50%;background:rgba(26,95,191,.05);pointer-events:none}
+.dias-kpi>*{position:relative;z-index:1}
 .dias-kpi-principal,.dias-kpi-operacao,.dias-kpi-contexto{grid-column:span 2}
-.dias-kpi-meta{border-left-color:var(--blue)}
-.dias-kpi-realizado{border-left-color:var(--green)}
-.dias-kpi-pendente{border-left-color:var(--orange)}
-.dias-kpi-capacidade{border-left-color:var(--cyan)}
-.dias-kpi-equipe{border-left-color:var(--indigo)}
-.dias-kpi-competencia{border-left-color:var(--red)}
+.dias-kpi-meta{border-top-color:var(--blue)}
+.dias-kpi-realizado{border-top-color:var(--green)}
+.dias-kpi-pendente{border-top-color:var(--orange)}
+.dias-kpi-capacidade{border-top-color:var(--cyan)}
+.dias-kpi-equipe{border-top-color:var(--indigo)}
+.dias-kpi-competencia{border-top-color:var(--red)}
+.dias-kpi-meta:after{background:rgba(26,95,191,.05)}
+.dias-kpi-realizado:after{background:rgba(13,153,104,.06)}
+.dias-kpi-pendente:after{background:rgba(234,88,12,.06)}
+.dias-kpi-capacidade:after{background:rgba(8,145,178,.06)}
+.dias-kpi-equipe:after{background:rgba(79,70,229,.06)}
+.dias-kpi-competencia:after{background:rgba(220,38,38,.05)}
 .dias-kpi span{display:block;width:100%;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:800;margin:0;line-height:1.15;white-space:normal}
 .dias-kpi strong{display:block;width:100%;font-family:'IBM Plex Mono',monospace;font-size:20px;line-height:1;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dias-kpi input.dias-meta-input{display:block;width:100%;min-width:0;border:0;background:transparent;padding:0;margin:0;font-family:'IBM Plex Mono',monospace;font-size:20px;line-height:1;color:var(--navy);font-weight:800;outline:0}
 .dias-kpi input.dias-meta-input:focus{box-shadow:0 2px 0 var(--blue)}
 .dias-kpi-click{font-family:inherit;text-align:left;cursor:pointer}
-.dias-kpi-click:hover{background:#eef5ff;border-color:#b8cdea;transform:translateY(-1px)}
+.dias-kpi:hover,.dias-kpi-click:hover{background:var(--surface);border-color:#c7d5e8;box-shadow:var(--shadow);transform:translateY(-1px)}
 
 .dias-kpi small{display:block;width:100%;margin-top:0;color:var(--text-muted);font-weight:700;font-size:9px;line-height:1.2;white-space:normal}
 .dias-note{background:#f5f8ff;border:1px solid #cfe0ff;border-left:4px solid var(--blue);border-radius:12px;padding:14px 16px;color:#24426c;font-weight:600;line-height:1.55}
@@ -466,7 +474,10 @@ tr.contrato-encontrado td{background:#fff2b8!important;box-shadow:inset 4px 0 0 
 .plantoes-config-table th,.plantoes-config-table td{padding:4px 5px;font-size:10px}
 .plantoes-config-table input:focus,.plantoes-config-table select:focus,.plantoes-table input:focus,.plantoes-table select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,95,196,.11)}
 .plantoes-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.plantoes-chip{border:1px solid var(--border);border-radius:8px;background:linear-gradient(180deg,#fff,#f8fbff);padding:6px;box-shadow:var(--shadow-sm);min-width:0}
+.plantoes-chip{border:1px solid var(--border);border-top:3px solid var(--blue);border-radius:var(--radius-lg);background:var(--surface);padding:6px;box-shadow:var(--shadow-sm);min-width:0;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}
+.plantoes-chip:after{content:"";position:absolute;right:-22px;top:-24px;width:58px;height:58px;border-radius:50%;background:rgba(26,95,191,.05);pointer-events:none}
+.plantoes-chip>*{position:relative;z-index:1}
+.plantoes-chip:hover{border-color:#c7d5e8;box-shadow:var(--shadow);transform:translateY(-1px)}
 .plantoes-chip span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-weight:800;margin-bottom:4px}
 .plantoes-chip strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--navy);line-height:1.1}
 .plantoes-month-title{margin:0 0 2px;font-size:12px;color:var(--navy);font-weight:800}
@@ -477,7 +488,8 @@ tr.contrato-encontrado td{background:#fff2b8!important;box-shadow:inset 4px 0 0 
 .plantoes-inline-kpis .plantoes-chip strong{font-size:14px}
 .plantoes-inline-kpis .plantoes-chip span{font-size:8px;margin-bottom:2px}
 .plantoes-tecnico-resumo{display:flex;align-items:center;justify-content:flex-start;gap:5px;flex-wrap:wrap;width:100%;margin:7px 0 0;padding-top:7px;border-top:1px solid var(--border)}
-.plantoes-tecnico-chip{display:inline-flex;align-items:center;gap:5px;background:#f8fbff;border:1px solid var(--border);border-radius:999px;padding:4px 7px;color:var(--navy);font-size:9.5px;font-weight:800}
+.plantoes-tecnico-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--cyan);border-radius:var(--radius-lg);padding:5px 8px;color:var(--navy);font-size:9.5px;font-weight:800;box-shadow:var(--shadow-sm);transition:transform .18s,box-shadow .18s,border-color .18s}
+.plantoes-tecnico-chip:hover{border-color:#c7d5e8;box-shadow:var(--shadow);transform:translateY(-1px)}
 .plantoes-tecnico-chip strong{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--blue)}
 .plantoes-tecnico-chip span{max-width:105px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plantoes-folga-card .section-title-line{justify-content:center;text-align:center}
@@ -1802,13 +1814,27 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 #cardLogOfensor{
   border-left-color:var(--red);
 }
+#cardLogOfensor:hover{
+  border-left-color:#cbd5e1;
+}
 #cardLogOfensor:before{
   content:"LOG";
   display:flex;
   align-items:center;
   justify-content:center;
+  position:absolute;
+  right:16px;
+  top:16px;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:rgba(220,38,38,.08);
+  z-index:0;
   color:var(--red);
   font:700 10px 'IBM Plex Mono',monospace;
+}
+#cardLogOfensor:after{
+  background:rgba(220,38,38,.055);
 }
 #cardLogOfensor .kpi-value{
   color:#9c2634;
@@ -2097,11 +2123,6 @@ button:hover,.btn:hover{transform:translateY(-1px)}
       <div class="section-title-line">
         <h2>Performance por Técnico</h2>
       </div>
-      <div class="performance-date-filter" aria-label="Filtro de data da Performance por Técnico">
-        <label>De<input type="date" id="filtroPerformanceDataIni"></label>
-        <label>Até<input type="date" id="filtroPerformanceDataFim"></label>
-        <button id="btnPerformanceLimparData" class="secondary" type="button">Limpar data</button>
-      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -2112,6 +2133,11 @@ button:hover,.btn:hover{transform:translateY(-1px)}
           </thead>
           <tbody id="tabelaTecnicos"><tr><td colspan="11"><div class="empty">Carregue a base para visualizar.</div></td></tr></tbody>
         </table>
+      </div>
+      <div class="performance-date-filter" aria-label="Filtro de data da Performance por Técnico">
+        <label>De<input type="date" id="filtroPerformanceDataIni"></label>
+        <label>Até<input type="date" id="filtroPerformanceDataFim"></label>
+        <button id="btnPerformanceLimparData" class="secondary" type="button">Limpar data</button>
       </div>
       <div id="cardsTecnicosMobile" class="mobile-tech-cards"><div class="empty">Carregue a base para visualizar.</div></div>
     </div>
@@ -3412,8 +3438,10 @@ function renderDashboard(summary){
       const abre=r.login!==atual;atual=r.login;
       const contratoBusca=String(r.contrato||"").replace(/[^0-9a-zA-Z]/g,"").toLowerCase();
       const dataBusca=dataKeyFiltro(r.dataRevisita||r.dataPrimeira||"");
+      const codigoPrimeira=nomeCodigoIndicador(r.codigoPrimeira||"-");
+      const codigoRevisita=nomeCodigoIndicador(r.codigoRevisita||"-");
       return `${abre?`<tr class="group-row"><td colspan="8"><span>${nomeTecnico(r.login)}${TECNICOS_NOMES[loginKey(r.login)]?` <small>(${loginKey(r.login)})</small>`:""}</span></td></tr>`:""}
-      <tr data-contrato="${contratoBusca}" data-contrato-label="${r.contrato}" data-date="${dataBusca}"><td>${r.contrato}</td><td>${r.codigoPrimeira||"-"}</td><td>${r.dataPrimeira||"-"}</td><td>${r.codigoRevisita||"-"}</td><td>${r.dataRevisita||"-"}</td><td>${r.qt}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
+      <tr data-contrato="${contratoBusca}" data-contrato-label="${r.contrato}" data-date="${dataBusca}"><td>${r.contrato}</td><td>${codigoPrimeira}</td><td>${r.dataPrimeira||"-"}</td><td>${codigoRevisita}</td><td>${r.dataRevisita||"-"}</td><td>${r.qt}</td><td>${r.tipo}</td><td>${r.node}</td></tr>`;
     }).join("");
   }else{
     $("tabelaRevisitas").innerHTML='<tr><td colspan="8"><div class="empty">Nenhuma revisita encontrada.</div></td></tr>';
