@@ -5093,7 +5093,8 @@ function tecnicoFeriasNoDiaDias(tec,iso){
 function qtdTecnicosFeriasDiaDias(ano,mes,dia){
   const estado=lerEstadoPlantoesDias();
   const iso=dataISO(ano,mes,dia);
-  const tecnicos=estado?.technicians||[];
+  const month=obterMesPlantaoDias(ano,mes);
+  const tecnicos=month?.technicians||estado?.technicians||[];
   return tecnicos.filter(t=>tecnicoFeriasNoDiaDias(t,iso)).length;
 }
 function equipeAtivaDiaDias(ano,mes,dia){
@@ -6009,12 +6010,53 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 
 
+  function statusBaseTecnicoPlantao(t){
+    return t?.status==="Técnico noturno" ? "Técnico noturno" : "Ativo";
+  }
+  function normalizarTecnicosPorMesPlantao(state){
+    if(!state||!Array.isArray(state.technicians)||!Array.isArray(state.months)) return;
+    const selecionado=Math.min(Math.max(Number(state.selectedMonthIndex||0),0),Math.max(state.months.length-1,0));
+    state.months.forEach((month,idx)=>{
+      const existentes=new Map((Array.isArray(month.technicians)?month.technicians:[]).map(t=>[t.id,t]));
+      month.technicians=state.technicians.map((base,i)=>{
+        const atual=existentes.get(base.id);
+        const herdouStatus=!existentes.has(base.id) && idx===selecionado && ["Férias","Inativo"].includes(base.status);
+        const status=atual?.status || (herdouStatus?base.status:statusBaseTecnicoPlantao(base));
+        return {
+          id:base.id,
+          label:base.label||`Técnico ${i+1}`,
+          name:atual?.name||base.name||"",
+          status,
+          start:atual?.start || (herdouStatus?base.start||"":""),
+          end:atual?.end || (herdouStatus?base.end||"":"")
+        };
+      });
+    });
+    state.technicians=state.technicians.map((t,i)=>({
+      ...t,
+      label:t.label||`Técnico ${i+1}`,
+      status:statusBaseTecnicoPlantao(t),
+      start:t.status==="Técnico noturno"?t.start||"":"",
+      end:t.status==="Técnico noturno"?t.end||"":""
+    }));
+  }
+  function mesSelecionadoPlantao(){
+    const sel=$p("plantaoMes");
+    return plantaoState?.months?.[Number(sel?.value)||plantaoMesAtualIndex||0]||plantaoState?.months?.[0]||null;
+  }
+  function tecnicosPlantaoMes(month=mesSelecionadoPlantao()){
+    if(!plantaoState) return [];
+    normalizarTecnicosPorMesPlantao(plantaoState);
+    return Array.isArray(month?.technicians)?month.technicians:plantaoState.technicians||[];
+  }
+
   function garantirConfigPlantao(sincronizar=true){
     if(!plantaoState) return;
     const existeIzidoro=(plantaoState.technicians||[]).some(t=>String(t.name||"").trim().toUpperCase()==="IZIDORO PEREIRA"||t.id==="t_izidoro");
     if(!existeIzidoro){
       plantaoState.technicians.push({id:"t_izidoro",label:"Técnico 7",name:"Izidoro Pereira",status:"Técnico noturno",start:"",end:""});
     }
+    normalizarTecnicosPorMesPlantao(plantaoState);
     if(!Array.isArray(plantaoState.allowedFolgaWeekdays)||!plantaoState.allowedFolgaWeekdays.length){
       plantaoState.allowedFolgaWeekdays=[2,3,4,6];
     }
@@ -6041,9 +6083,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     });
   }
 
-  function opcoesTecnicos(selectedId,opcional=false){
+  function opcoesTecnicos(selectedId,opcional=false,month=mesSelecionadoPlantao()){
     const vazio=opcional?`<option value="" ${!selectedId?"selected":""}>Sem 3º técnico</option>`:"";
-    return vazio+plantaoState.technicians.map(t=>{
+    return vazio+tecnicosPlantaoMes(month).map(t=>{
       const extra = t.status==="Férias" ? " (férias)" : (t.status==="Inativo" ? " (inativo)" : (t.status==="Técnico noturno" ? " (noturno)" : ""));
       return `<option value="${t.id}" ${t.id===selectedId?"selected":""}>${t.name}${extra}</option>`;
     }).join("");
@@ -6182,15 +6224,16 @@ document.addEventListener("DOMContentLoaded",()=>{
         if(i===rowIndex && c===campo) continue;
         if(c==="folgaCWeekday"&&!outra.baseC) continue;
         if(folgaISOFromEvent(outra.date,outra[c])===iso){
-          const tecnico=c==="folgaAWeekday"?tecnicoPorId(outra.baseA):c==="folgaBWeekday"?tecnicoPorId(outra.baseB):tecnicoPorId(outra.baseC);
+          const tecnico=c==="folgaAWeekday"?tecnicoPorId(outra.baseA,month):c==="folgaBWeekday"?tecnicoPorId(outra.baseB,month):tecnicoPorId(outra.baseC,month);
           return {iso,data:formatDateBR(iso),tecnico:tecnico?.name||"outro técnico"};
         }
       }
     }
     return null;
   }
-  function tecnicoPorId(id){
-    return plantaoState.technicians.find(t=>t.id===id)||plantaoState.technicians[0];
+  function tecnicoPorId(id,month=mesSelecionadoPlantao()){
+    const lista=tecnicosPlantaoMes(month);
+    return lista.find(t=>t.id===id)||lista[0]||plantaoState.technicians[0];
   }
   function emFerias(tec,iso){
     if(!tec||tec.status!=="Férias"||!tec.start||!tec.end) return false;
@@ -6199,10 +6242,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   function disponivel(tec,iso,excluidos=new Set()){
     return tec && !["Inativo","Férias","Técnico noturno"].includes(tec.status) && !excluidos.has(tec.id);
   }
-  function escolherTecnico(preferidoId,iso,excluidos=new Set()){
-    const pref=tecnicoPorId(preferidoId);
+  function escolherTecnico(preferidoId,iso,excluidos=new Set(),month=mesSelecionadoPlantao()){
+    const lista=tecnicosPlantaoMes(month);
+    const pref=tecnicoPorId(preferidoId,month);
     if(disponivel(pref,iso,excluidos)) return pref;
-    const lista=plantaoState.technicians;
     const idx=Math.max(0,lista.findIndex(t=>t.id===preferidoId));
     for(let i=1;i<=lista.length;i++){
       const cand=lista[(idx+i)%lista.length];
@@ -6268,7 +6311,9 @@ document.addEventListener("DOMContentLoaded",()=>{
     const body=$p("plantaoConfigBody");
     if(!body) return;
     const bloqueado=plantaoEdicaoGeralAtiva?"":" disabled";
-    body.innerHTML=plantaoState.technicians.map((t,i)=>`<tr>
+    const month=mesSelecionadoPlantao();
+    const tecnicosMes=tecnicosPlantaoMes(month);
+    body.innerHTML=tecnicosMes.map((t,i)=>`<tr>
       <td><strong>${t.label||("Técnico "+(i+1))}</strong></td>
       <td><input data-plantao-tech="${t.id}" data-field="name" value="${String(t.name||"").replace(/"/g,"&quot;")}"${bloqueado}></td>
       <td>
@@ -6285,9 +6330,20 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     const atualizarCampo=(el)=>{
       if(!plantaoEdicaoGeralAtiva) return;
-      const tec=tecnicoPorId(el.dataset.plantaoTech);
-      tec[el.dataset.field]=el.value;
-      if(el.dataset.field==="status") recalcularPlantoesPorDisponibilidade();
+      const month=mesSelecionadoPlantao();
+      const tec=tecnicoPorId(el.dataset.plantaoTech,month);
+      if(el.dataset.field==="name"){
+        const global=plantaoState.technicians.find(t=>t.id===el.dataset.plantaoTech);
+        if(global) global.name=el.value;
+        (plantaoState.months||[]).forEach(m=>{
+          const item=(m.technicians||[]).find(t=>t.id===el.dataset.plantaoTech);
+          if(item) item.name=el.value;
+        });
+      }else{
+        tec[el.dataset.field]=el.value;
+      }
+      if(el.dataset.field==="status") recalcularPlantoesPorDisponibilidade(month);
+      renderConfigPlantoes();
       renderTabelaPlantoes();
       salvarEdicaoPlantoesAutomaticamente();
     };
@@ -6322,6 +6378,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       plantaoState.selectedMonthIndex=plantaoMesAtualIndex;
       const month=plantaoState.months[plantaoMesAtualIndex];
       if(month) ajustarTituloPlantao(month);
+      renderConfigPlantoes();
       renderTabelaPlantoes();
     });
   }
@@ -6355,19 +6412,17 @@ document.addEventListener("DOMContentLoaded",()=>{
     ajustarFolgasUnicasMes(month);
   }
 
-  function recalcularPlantoesPorDisponibilidade(){
-    if(!plantaoState) return;
-    (plantaoState.months||[]).forEach(month=>{
-      (month.rows||[]).forEach(row=>{
-        const a=row.baseA?tecnicoPorId(row.baseA):null;
-        const b=row.baseB?tecnicoPorId(row.baseB):null;
-        const c=row.baseC?tecnicoPorId(row.baseC):null;
-        if(a&&!disponivel(a,row.date,new Set())) row.baseA="";
-        if(b&&!disponivel(b,row.date,new Set())) row.baseB="";
-        if(c&&!disponivel(c,row.date,new Set())) row.baseC="";
-      });
-      redistribuirPlantoesMes(month);
+  function recalcularPlantoesPorDisponibilidade(month=mesSelecionadoPlantao()){
+    if(!plantaoState||!month) return;
+    (month.rows||[]).forEach(row=>{
+      const a=row.baseA?tecnicoPorId(row.baseA,month):null;
+      const b=row.baseB?tecnicoPorId(row.baseB,month):null;
+      const c=row.baseC?tecnicoPorId(row.baseC,month):null;
+      if(a&&!disponivel(a,row.date,new Set())) row.baseA="";
+      if(b&&!disponivel(b,row.date,new Set())) row.baseB="";
+      if(c&&!disponivel(c,row.date,new Set())) row.baseC="";
     });
+    redistribuirPlantoesMes(month);
   }
 
   function redistribuirFolgasMes(month){
@@ -6389,7 +6444,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function garantirTodosTecnicosNoMes(month){
     if(!month||!Array.isArray(month.rows)) return false;
-    const ativos=(plantaoState.technicians||[]).filter(t=>disponivel(t,"2026-01-01",new Set()));
+    const ativos=tecnicosPlantaoMes(month).filter(t=>disponivel(t,"2026-01-01",new Set()));
     const vagas=month.rows.reduce((total,row)=>total+2+(row.baseC?1:0),0);
     const minimo=Math.min(ativos.length,vagas);
     const ativosIds=new Set(ativos.map(t=>t.id));
@@ -6406,7 +6461,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   function redistribuirPlantoesMes(month){
     if(!month||!Array.isArray(month.rows)) return false;
     garantirConfigPlantao(false);
-    const ativos=(plantaoState.technicians||[]).filter(t=>disponivel(t,"2026-01-01",new Set()));
+    const ativos=tecnicosPlantaoMes(month).filter(t=>disponivel(t,"2026-01-01",new Set()));
     if(ativos.length<2) return false;
     const mesIndex=(plantaoState.months||[]).indexOf(month);
     const mesAnterior=mesIndex>0?plantaoState.months[mesIndex-1]:null;
@@ -6446,13 +6501,13 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
 
   
-  function calcularLinhaPlantao(row){
+  function calcularLinhaPlantao(row,month=mesSelecionadoPlantao()){
     const exclA=new Set();
-    const tecA=escolherTecnico(row.baseA,row.date,exclA);
+    const tecA=escolherTecnico(row.baseA,row.date,exclA,month);
     const exclB=new Set([tecA.id]);
-    const tecB=escolherTecnico(row.baseB,row.date,exclB);
+    const tecB=escolherTecnico(row.baseB,row.date,exclB,month);
     const exclC=new Set([tecA.id,tecB.id]);
-    const tecC=row.baseC?escolherTecnico(row.baseC,row.date,exclC):null;
+    const tecC=row.baseC?escolherTecnico(row.baseC,row.date,exclC,month):null;
     const folgaA=proximaFolga(row.date,row.folgaAWeekday);
     const folgaB=proximaFolga(row.date,row.folgaBWeekday);
     const folgaC=tecC?proximaFolga(row.date,row.folgaCWeekday):"";
@@ -6474,7 +6529,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         contagem.set(id,(contagem.get(id)||0)+1);
       });
     });
-    const itens=(plantaoState.technicians||[])
+    const itens=tecnicosPlantaoMes(month)
       .filter(t=>contagem.has(t.id))
       .map(t=>({nome:t.name,qtd:contagem.get(t.id)||0}))
       .sort((a,b)=>b.qtd-a.qtd || a.nome.localeCompare(b.nome,"pt-BR"));
@@ -6495,7 +6550,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   function criarShellPlantaoMes(month,modo="pdf"){
     const mostrarTecnicoC=month.rows.some(row=>!!row.baseC);
     const linhas=month.rows.map(row=>{
-      const calc=calcularLinhaPlantao(row);
+      const calc=calcularLinhaPlantao(row,month);
       return `<tr>
         <td>${escapePlantao(formatDateBR(row.date))}</td>
         <td>${escapePlantao(semana(row.date))}</td>
@@ -6609,7 +6664,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     let avisos=0, redistribuidos=0, totalTerceiro=0;
     const linhas=month.rows.map((row,idx)=>{
       if(row.baseC) totalTerceiro++;
-      const calc=calcularLinhaPlantao(row);
+      const calc=calcularLinhaPlantao(row,month);
       const tecA=calc.tecA;
       const tecB=calc.tecB;
       const tecC=calc.tecC;
@@ -6627,9 +6682,9 @@ document.addEventListener("DOMContentLoaded",()=>{
         <td class="plantoes-readonly">${semana(row.date)}</td>
         <td><input data-field="type" value="${String(row.type||"").replace(/"/g,"&quot;")}"></td>
         <td><input data-field="description" value="${String(row.description||"").replace(/"/g,"&quot;")}"></td>
-        <td class="plantoes-plantao"><select class="plantoes-select-cell" data-field="baseA">${opcoesTecnicos(tecA.id)}</select></td>
-        <td class="plantoes-plantao"><select class="plantoes-select-cell" data-field="baseB">${opcoesTecnicos(tecB.id)}</select></td>
-        <td class="plantoes-plantao plantoes-terceiro-col"><select class="plantoes-select-cell" data-field="baseC">${opcoesTecnicos(tecC?.id||row.baseC||"",true)}</select>${tecC?"":"<div class='plantoes-terceiro-vazio'>opcional</div>"}</td>
+        <td class="plantoes-plantao"><select class="plantoes-select-cell" data-field="baseA">${opcoesTecnicos(tecA.id,false,month)}</select></td>
+        <td class="plantoes-plantao"><select class="plantoes-select-cell" data-field="baseB">${opcoesTecnicos(tecB.id,false,month)}</select></td>
+        <td class="plantoes-plantao plantoes-terceiro-col"><select class="plantoes-select-cell" data-field="baseC">${opcoesTecnicos(tecC?.id||row.baseC||"",true,month)}</select>${tecC?"":"<div class='plantoes-terceiro-vazio'>opcional</div>"}</td>
         <td class="plantoes-folga"><select class="plantoes-folga-cell" data-field="folgaAWeekday">${opcoesFolga(row.folgaAWeekday)}</select><div class="plantoes-folga-date">${folgaA}</div></td>
         <td class="plantoes-folga"><select class="plantoes-folga-cell" data-field="folgaBWeekday">${opcoesFolga(row.folgaBWeekday)}</select><div class="plantoes-folga-date">${folgaB}</div></td>
         <td class="plantoes-folga plantoes-terceiro-col">${tecC?`<select class="plantoes-folga-cell" data-field="folgaCWeekday">${opcoesFolga(row.folgaCWeekday)}</select><div class="plantoes-folga-date">${folgaC}</div>`:"<span class='plantoes-terceiro-vazio'>sem 3º técnico</span>"}</td>
@@ -7181,6 +7236,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
+
 
 
 
