@@ -131,31 +131,6 @@ h3{font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:10px;tex
 .contratos-lado-lado>section{min-width:0}
 .contratos-lado-lado .card{height:100%}
 .contratos-lado-lado .section-caption{white-space:normal}
-.action-card{min-height:0;position:relative;overflow:hidden;border-top:3px solid var(--blue);padding-top:22px}
-.action-card:after{content:"";position:absolute;right:-26px;top:-32px;width:86px;height:86px;border-radius:50%;background:rgba(26,95,191,.06);pointer-events:none}
-#alertasArea .action-card:nth-child(1){border-top-color:var(--indigo)}
-#alertasArea .action-card:nth-child(2){border-top-color:var(--cyan)}
-#alertasArea .action-card:nth-child(3){border-top-color:var(--green)}
-#alertasArea .action-card:nth-child(1):after{background:rgba(79,70,229,.07)}
-#alertasArea .action-card:nth-child(2):after{background:rgba(8,145,178,.08)}
-#alertasArea .action-card:nth-child(3):after{background:rgba(13,153,104,.08)}
-.action-card p{color:var(--text);font-size:13px;line-height:1.6;font-weight:500}
-.positive-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
-.positive-period-label{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:#047857;background:#dcfce7;border:1px solid #86efac;border-radius:999px;padding:3px 7px;white-space:nowrap}
-.positive-highlight{display:grid;gap:8px;align-content:start;padding:12px 14px;border:1px solid #bbf7d0;border-left:4px solid var(--green);border-radius:8px;background:linear-gradient(180deg,#f7fff9,#eefdf4);min-height:150px}
-.positive-highlight strong{display:block;color:#10213a;font-size:12.5px;line-height:1.15}
-.positive-highlight span{display:block;color:#64748b;font-size:10.5px;font-weight:700;line-height:1.25;margin-top:2px}
-.positive-ranking-list{display:grid;gap:5px;margin-top:6px;color:#475569;font-size:11px;font-weight:700;line-height:1.3}
-.positive-ranking-list div{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;white-space:normal}
-.positive-rank-pos{font-family:'IBM Plex Mono',monospace;font-weight:900;color:#047857}
-.positive-report-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
-.positive-report-kpi{border:1px solid #d9e2ee;border-left:3px solid var(--green);border-radius:8px;background:#fff;padding:9px 11px}
-.positive-report-kpi span{display:block;font-size:9px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#64748b}
-.positive-report-kpi strong{display:block;margin-top:3px;font:900 17px/1 'IBM Plex Mono',monospace;color:#10213a}
-.positive-report-note{margin-top:10px;color:#64748b;font-size:11px;font-weight:700;line-height:1.4}
-@media(max-width:1100px){.positive-highlights,.positive-report-summary{grid-template-columns:1fr}}
-.positive-score{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:900;color:#047857;background:#dcfce7;border:1px solid #86efac;border-radius:999px;padding:4px 7px;white-space:nowrap}
-
 /* ─── TABLES ─── */
 .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface)}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
@@ -2149,17 +2124,6 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 
   </section>
 
-  <!-- DESTAQUE POSITIVO -->
-  <section class="grid" id="alertasArea">
-    <div class="card action-card positive-report-card">
-      <div class="section-title-line">
-        <h2>Destaque Positivo</h2>
-        <span class="section-caption">Ranking de performance por período</span>
-      </div>
-      <div id="destaquePositivo"><div class="empty">Aguardando dados.</div></div>
-    </div>
-  </section>
-
   <!-- RANKING OPERACIONAL + ACOMPANHAMENTO -->
   <section class="grid2" id="secRankingOperacional">
     <div class="card plantoes-resumo-card">
@@ -2292,7 +2256,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   <div class="card dias-table-card">
     <div class="section-title-line">
       <h2>Produção Mensal por Técnico</h2>
-      <span class="section-caption">A capacidade da equipe é dividida entre os técnicos com DT preenchido. As produções diárias são lidas da coluna DT da planilha de controle.</span>
+      <span class="section-caption">A capacidade individual considera plantões, folgas compensatórias, férias e viradas de mês. As produções diárias são lidas da coluna DT da planilha de controle.</span>
     </div>
     <div class="table-wrap dias-table-wrap">
       <table>
@@ -5235,6 +5199,16 @@ let diasDadosAtuais=null;
 let diasMesInfoAtual=null;
 let diasFonteAtual="";
 let capacidadeMesSelecionado=null;
+const CADASTRO_TECNICOS_DIAS=[
+  {escalaId:"t6",planilha:["ALEX"],exibicao:"Alex",escala:["Alex"],statusPadrao:"Ativo"},
+  {escalaId:"t1",planilha:["GEOVANIO"],exibicao:"MATHEUS HENRIQUE",escala:["MATHEUS HENRIQUE"],statusPadrao:"Ativo"},
+  {escalaId:"t_izidoro",planilha:["IZIDORO","IZIDORO PEREIRA"],exibicao:"Izidoro",escala:["Izidoro Pereira","Izidoro"],statusPadrao:"Técnico noturno"},
+  {escalaId:"t4",planilha:["JOSE FRANCISCO"],exibicao:"José Francisco",escala:["José Francisco"],statusPadrao:"Ativo"},
+  {escalaId:"",planilha:["KLEYTON"],exibicao:"Kleyton",escala:["Kleyton"],statusPadrao:"Ativo"},
+  {escalaId:"t5",planilha:["LAILSON"],exibicao:"Lailson",escala:["Lailson"],statusPadrao:"Ativo"},
+  {escalaId:"t2",planilha:["MATEUS REIS","MATHEUS REIS"],exibicao:"Matheus Reis",escala:["Matheus Reis"],statusPadrao:"Ativo"},
+  {escalaId:"t3",planilha:["APOLINARIO"],exibicao:"Apolinário",escala:["Apolinário"],statusPadrao:"Ativo"}
+];
 
 function setDiasText(id,valor){const el=$(id); if(el){ if("value" in el) el.value=String(valor).replace(/\./g,""); else el.textContent=valor; }}
 function formatNumeroDias(v,casas=0){
@@ -5393,8 +5367,9 @@ function tecnicoPlantaoPorNomeDias(nome,ano,mes){
   const estado=lerEstadoPlantoesDias();
   const month=obterMesPlantaoDias(ano,mes);
   const tecnicos=month?.technicians||estado?.technicians||[];
-  const alvo=head(nome);
-  return tecnicos.find(t=>head(t?.name)===alvo || head(t?.label)===alvo)||null;
+  const cadastro=cadastroTecnicoDias(nome);
+  const alvos=[nome,cadastro?.exibicao,...(cadastro?.planilha||[]),...(cadastro?.escala||[])].filter(Boolean).map(head);
+  return tecnicos.find(t=>(cadastro?.escalaId && t?.id===cadastro.escalaId) || alvos.includes(head(t?.name)) || alvos.includes(head(t?.label)))||null;
 }
 function idsTecnicosFolgaPlantaoDiaDias(ano,mes,dia){
   const estado=lerEstadoPlantoesDias();
@@ -5508,9 +5483,12 @@ function tecnicoExcluidoDias(nome){
   const chave=head(nome);
   return (DIAS_SHEET_CONFIG.excluirTecnicosDias||[]).some(t=>chave.includes(head(t)));
 }
+function cadastroTecnicoDias(nome){
+  const alvo=head(nome);
+  return CADASTRO_TECNICOS_DIAS.find(t=>[t.exibicao,...(t.planilha||[]),...(t.escala||[])].some(n=>head(n)===alvo))||null;
+}
 function nomeExibicaoTecnicoDias(nome){
-  const aliases={"GEOVANIO":"MATHEUS HENRIQUE"};
-  return aliases[head(nome)]||nome;
+  return cadastroTecnicoDias(nome)?.exibicao||nome;
 }
 function regraCalendarioDias(mesInfo){
   return {
@@ -5902,12 +5880,10 @@ function renderTabelaTecnicosDias(dados,mesInfo){
     tbody.innerHTML='<tr><td colspan="3"><div class="empty">Nenhum técnico com DT preenchido na planilha de controle.</div></td></tr>';
     return;
   }
-  const capacidadeEquipe=detalhesCapacidadeMes(mesInfo,1).total||0;
-  const capacidadePorTecnico=capacidadeEquipe/rows.length;
   tbody.innerHTML=rows.map(t=>{
     return `<tr>
       <td><strong>${esc(t.nome)}</strong></td>
-      <td>${formatNumeroDias(capacidadePorTecnico,1)} dias</td>
+      <td>${formatNumeroDias(t.diasPrevistos,0)} dias</td>
       <td>${formatNumeroDias(t.dt,0)}</td>
     </tr>`;
   }).join("");
