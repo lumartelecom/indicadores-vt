@@ -5199,6 +5199,9 @@ let diasDadosAtuais=null;
 let diasMesInfoAtual=null;
 let diasFonteAtual="";
 let capacidadeMesSelecionado=null;
+let diasAtualizacaoEmAndamento=false;
+let diasAtualizacaoPendente=false;
+let diasAtualizacaoIntervalo=null;
 const CADASTRO_TECNICOS_DIAS=[
   {escalaId:"t6",planilha:["ALEX"],exibicao:"Alex",escala:["Alex"],statusPadrao:"Ativo"},
   {escalaId:"t1",planilha:["GEOVANIO"],exibicao:"MATHEUS HENRIQUE",escala:["MATHEUS HENRIQUE"],statusPadrao:"Ativo"},
@@ -5986,7 +5989,13 @@ function mesInfoPlantaoVigenteDias(fallbackMesInfo){
 }
 
 
-async function atualizarDiasTrabalhados(){
+async function atualizarDiasTrabalhados(opcoes={}){
+  if(opcoes.limparCache) diasCachePlanilha={};
+  if(diasAtualizacaoEmAndamento){
+    diasAtualizacaoPendente=true;
+    return;
+  }
+  diasAtualizacaoEmAndamento=true;
   const mesInfo=mesDiasSelecionado();
   const selDias=$("diasMes");
   if(selDias&&mesInfo) selDias.value=String(mesInfo.num);
@@ -6003,7 +6012,15 @@ async function atualizarDiasTrabalhados(){
     renderDiasErro(e.message||String(e));
   }finally{
     if(painel) painel.classList.remove("dias-loading");
+    diasAtualizacaoEmAndamento=false;
+    if(diasAtualizacaoPendente){
+      diasAtualizacaoPendente=false;
+      atualizarDiasTrabalhados();
+    }
   }
+}
+function atualizarDiasTrabalhadosAutomaticamente(){
+  atualizarDiasTrabalhados({limparCache:true});
 }
 function atualizarCardCapacidadeSelecionada(){
   const sel=$("capacidadeMesSelectTopo");
@@ -6037,7 +6054,7 @@ function inicializarDiasTrabalhados(){
   const sel=$("diasMes");
   if(sel) sel.addEventListener("change",atualizarDiasTrabalhados);
   const btn=$("btnAtualizarDias");
-  if(btn) btn.addEventListener("click",()=>{diasCachePlanilha={};atualizarDiasTrabalhados();});
+  if(btn) btn.addEventListener("click",atualizarDiasTrabalhadosAutomaticamente);
   const metaInput=$("diasMetaMensal");
   if(metaInput){
     metaInput.addEventListener("change",()=>aplicarMetaManualDias(metaInput.value));
@@ -6048,6 +6065,11 @@ function inicializarDiasTrabalhados(){
       atualizarDiasTrabalhados();
     });
     inicializarDiasTrabalhados._plantaoListener=true;
+  }
+  if(!diasAtualizacaoIntervalo){
+    diasAtualizacaoIntervalo=setInterval(()=>{
+      if($("dias")?.classList.contains("active")) atualizarDiasTrabalhadosAutomaticamente();
+    },60000);
   }
   atualizarDiasTrabalhados();
 }
@@ -6131,6 +6153,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       btn.classList.add("active");
       const panel=$(btn.dataset.tab);
       if(panel) panel.classList.add("active");
+      if(btn.dataset.tab==="dias") atualizarDiasTrabalhadosAutomaticamente();
     });
   });
 
