@@ -6754,6 +6754,9 @@ document.addEventListener("DOMContentLoaded",()=>{
       fim:`${ano}-${String(mes+1).padStart(2,"0")}-${String(new Date(ano,mes+1,0).getDate()).padStart(2,"0")}`
     };
   }
+  function mesJunho2026Plantao(month){
+    return anoPlantaoMes(month)===2026 && numeroMesPlantao(month)===5;
+  }
   function feriasCruzaMesPlantao(tec,month){
     if(!tec||tec.status!=="Férias") return false;
     if(!tec.start&&!tec.end) return true;
@@ -7098,6 +7101,22 @@ document.addEventListener("DOMContentLoaded",()=>{
       }else{
         tec[el.dataset.field]=el.value;
       }
+      if(el.dataset.field==="status"){
+        if(el.value==="Férias"){
+          const intervalo=intervaloMesPlantao(month);
+          if(!tec.start) tec.start=intervalo.inicio;
+          if(!tec.end) tec.end=intervalo.fim;
+        }else{
+          tec.start="";
+          tec.end="";
+        }
+      }
+      if(el.dataset.field==="start" && tec.status==="Férias" && tec.end && tec.end<tec.start){
+        tec.end=tec.start;
+      }
+      if(el.dataset.field==="end" && tec.status==="Férias" && tec.start && tec.end<tec.start){
+        tec.start=tec.end;
+      }
       if(["status","start","end"].includes(el.dataset.field)) recalcularPlantoesPorDisponibilidade(month);
       renderConfigPlantoes();
       renderTabelaPlantoes();
@@ -7105,7 +7124,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     };
 
     body.querySelectorAll("[data-plantao-tech]").forEach(el=>{
-      el.addEventListener("input",()=>atualizarCampo(el));
+      if(el.dataset.field==="name") el.addEventListener("input",()=>atualizarCampo(el));
       el.addEventListener("change",()=>atualizarCampo(el));
     });
     atualizarEstadoEdicaoPlantoes();
@@ -7170,6 +7189,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function recalcularPlantoesPorDisponibilidade(month=mesSelecionadoPlantao()){
     if(!plantaoState||!month) return;
+    if(mesJunho2026Plantao(month)) return;
     (month.rows||[]).forEach(row=>{
       const a=row.baseA?tecnicoPorId(row.baseA,month):null;
       const b=row.baseB?tecnicoPorId(row.baseB,month):null;
@@ -7183,6 +7203,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function redistribuirFolgasMes(month){
     if(!month||!Array.isArray(month.rows)) return false;
+    if(mesJunho2026Plantao(month)) return false;
     garantirConfigPlantao(false);
     const dias=plantaoState.allowedFolgaWeekdays||[2,3,4,6];
     if(!dias.length) return false;
@@ -7216,6 +7237,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function redistribuirPlantoesMes(month){
     if(!month||!Array.isArray(month.rows)) return false;
+    if(mesJunho2026Plantao(month)) return false;
     garantirConfigPlantao(false);
     const ativos=tecnicosPlantaoMes(month).filter(t=>(month.rows||[]).some(row=>disponivel(t,row.date,new Set())));
     if(ativos.length<2) return false;
@@ -7223,32 +7245,40 @@ document.addEventListener("DOMContentLoaded",()=>{
     const mesAnterior=mesIndex>0?plantaoState.months[mesIndex-1]:null;
     let ultimoPlantao=mesAnterior?.rows?.length?mesAnterior.rows[mesAnterior.rows.length-1]:null;
     let ultimosIds=ultimoPlantao?new Set([ultimoPlantao.baseA,ultimoPlantao.baseB,ultimoPlantao.baseC].filter(Boolean)):new Set();
-    const offset=Number(month.redistribPlantoesOffset||0);
-    let cursor=offset%ativos.length;
+    const contagem=new Map(ativos.map(t=>[t.id,0]));
+    const offset=Number(month.redistribPlantoesOffset||0)%ativos.length;
+    const ordemBase=[...ativos.slice(offset),...ativos.slice(0,offset)];
+    const ordem=new Map(ordemBase.map((t,i)=>[t.id,i]));
     const pegarProximo=(lista,excluidos,evitar)=>{
-      const limite=lista.length*2;
-      for(let tentativa=0;tentativa<limite;tentativa++){
-        const cand=lista[cursor%lista.length];
-        cursor++;
-        if(excluidos.has(cand.id)) continue;
-        if(tentativa<lista.length && evitar.has(cand.id)) continue;
-        return cand;
-      }
-      return lista.find(t=>!excluidos.has(t.id))||lista[0];
+      const base=lista.filter(t=>!excluidos.has(t.id));
+      if(!base.length) return null;
+      const semAnterior=base.filter(t=>!evitar.has(t.id));
+      const candidatos=semAnterior.length?semAnterior:base;
+      return candidatos.slice().sort((a,b)=>{
+        const qa=contagem.get(a.id)||0;
+        const qb=contagem.get(b.id)||0;
+        if(qa!==qb) return qa-qb;
+        return (ordem.get(a.id)||0)-(ordem.get(b.id)||0);
+      })[0];
     };
     month.rows.forEach((row,idx)=>{
       const disponiveis=ativos.filter(t=>disponivel(t,row.date,new Set()));
       const lista=disponiveis.length>=2?disponiveis:ativos;
       const usadosLinha=new Set();
       const a=pegarProximo(lista,usadosLinha,ultimosIds);
+      if(!a) return;
       usadosLinha.add(a.id);
+      contagem.set(a.id,(contagem.get(a.id)||0)+1);
       const b=pegarProximo(lista,usadosLinha,ultimosIds);
+      if(!b) return;
       usadosLinha.add(b.id);
+      contagem.set(b.id,(contagem.get(b.id)||0)+1);
       row.baseA=a.id;
       row.baseB=b.id;
       if(row.baseC){
         const c=pegarProximo(lista,usadosLinha,ultimosIds);
         row.baseC=c?c.id:"";
+        if(c) contagem.set(c.id,(contagem.get(c.id)||0)+1);
       }
       ultimosIds=new Set([row.baseA,row.baseB,row.baseC].filter(Boolean));
     });
@@ -7542,6 +7572,13 @@ document.addEventListener("DOMContentLoaded",()=>{
       const sel=$p("plantaoMes");
       const month=plantaoState.months[Number(sel?.value)||0];
       if(!month) return;
+      if(mesJunho2026Plantao(month)){
+        const msg="Plantões de Junho/2026 preservados. A redistribuição de folgas foi bloqueada para não mexer no mês atual.";
+        if(typeof setStatus==="function") setStatus(`⚠️ ${msg}`);
+        const feedback=$p("plantaoSalvarFeedback");
+        if(feedback) feedback.textContent=msg;
+        return;
+      }
       plantaoState.selectedMonthIndex=Number(sel?.value)||0;
       atualizarMesFromInputs(month);
       const ok=redistribuirFolgasMes(month);
@@ -7558,6 +7595,13 @@ document.addEventListener("DOMContentLoaded",()=>{
       const sel=$p("plantaoMes");
       const month=plantaoState.months[Number(sel?.value)||0];
       if(!month) return;
+      if(mesJunho2026Plantao(month)){
+        const msg="Plantões de Junho/2026 preservados. A redistribuição foi bloqueada para não mexer no mês atual.";
+        if(typeof setStatus==="function") setStatus(`⚠️ ${msg}`);
+        const feedback=$p("plantaoSalvarFeedback");
+        if(feedback) feedback.textContent=msg;
+        return;
+      }
       plantaoState.selectedMonthIndex=Number(sel?.value)||0;
       atualizarMesFromInputs(month);
       const ok=redistribuirPlantoesMes(month);
