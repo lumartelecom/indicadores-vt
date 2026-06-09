@@ -2444,6 +2444,22 @@ button:hover,.btn:hover{transform:translateY(-1px)}
           </tbody>
         </table>
       </div>
+
+      <div class="certificado-resumo-bloco">
+        <h3>Resumo dos Indicadores por Técnico</h3>
+        <div class="table-wrap certificado-resumo-wrap">
+          <table class="certificado-resumo-table">
+            <thead>
+              <tr>
+                <th>Indicadores por técnico</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaResumoIndicadoresCertificado">
+              <tr><td><div class="empty">Carregue a base para visualizar os indicadores.</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -4775,6 +4791,104 @@ function valorSistemaCertificado(dados,login,campo){
   const valor=dados?.[key]?.[campo];
   return valor===0||valor?String(valor):"";
 }
+function desempenhoIndicadorCertificado(valor,meta,maiorMelhor=true){
+  const atual=Number(valor)||0;
+  const alvo=Number(meta)||0;
+  if(alvo<=0) return atual>0?100:0;
+  if(maiorMelhor) return Math.max(0,Math.min(100,(atual/alvo)*100));
+  if(atual<=alvo) return 100;
+  return Math.max(0,Math.min(100,(alvo/atual)*100));
+}
+function calcularDesempenhoGeralCertificado(t,dados){
+  const revPct=Number(t.revPct)||0;
+  const tec1Pct=Number(t.tec1Pct)||0;
+  const producao=Number(t.mediaContratos)||0;
+  const t1Valor=String(valorSistemaCertificado(dados,t.login,"t1")||"").trim();
+  const alfaValor=normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"alfa"));
+  const certidaoValor=normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"certidao"));
+  const t1Ok=t1Valor.toLowerCase()==="realizado";
+  const desempenhos=[
+    desempenhoIndicadorCertificado(revPct,LIMITE_ACOMP_REVISITA,false),
+    desempenhoIndicadorCertificado(tec1Pct,LIMITE_ACOMP_TEC1,true),
+    desempenhoIndicadorCertificado(producao,META_PRODUCAO,true),
+    t1Ok?100:0,
+    desempenhoIndicadorCertificado(alfaValor,METAS_CERTIFICADO.alfa,true),
+    desempenhoIndicadorCertificado(certidaoValor,METAS_CERTIFICADO.certidao,true)
+  ];
+  const geral=desempenhos.reduce((s,v)=>s+v,0)/desempenhos.length;
+  const indicadoresBatidos=[
+    revPct<=LIMITE_ACOMP_REVISITA,
+    tec1Pct>=LIMITE_ACOMP_TEC1 && (Number(t.tecBase)||0)>0,
+    producao>=META_PRODUCAO,
+    t1Ok,
+    alfaValor>=METAS_CERTIFICADO.alfa,
+    certidaoValor>=METAS_CERTIFICADO.certidao
+  ].filter(Boolean).length;
+  return {geral,indicadoresBatidos,total:desempenhos.length};
+}
+function resumoIndicadoresCertificado(t,dados){
+  const desempenho=calcularDesempenhoGeralCertificado(t,dados);
+  const ok=desempenho.indicadoresBatidos===desempenho.total;
+  return `<div class="cert-desempenho-geral ${ok?"ok":"pendente"}">
+    <strong>Desempenho geral</strong>
+    <span>${pct(desempenho.geral)}</span>
+    <small>${desempenho.indicadoresBatidos}/${desempenho.total} indicadores dentro da exigência</small>
+  </div>`;
+}
+function desempenhoGeralLinhaCertificado(tr){
+  const revPct=Number(tr?.dataset?.revPct)||0;
+  const tec1Pct=Number(tr?.dataset?.tec1Pct)||0;
+  const tecBase=Number(tr?.dataset?.tecBase)||0;
+  const producao=Number(tr?.dataset?.producao)||0;
+  const t1Valor=String(tr?.querySelector('[data-campo="t1"]')?.value||"").trim();
+  const alfaValor=normalizarPercentualCertificado(tr?.querySelector('[data-campo="alfa"]')?.value||"");
+  const certidaoValor=normalizarPercentualCertificado(tr?.querySelector('[data-campo="certidao"]')?.value||"");
+  const revOk=revPct<=LIMITE_ACOMP_REVISITA;
+  const tec1Ok=tec1Pct>=LIMITE_ACOMP_TEC1 && tecBase>0;
+  const prodOk=producao>=META_PRODUCAO;
+  const t1Ok=t1Valor.toLowerCase()==="realizado";
+  const alfaOk=alfaValor>=METAS_CERTIFICADO.alfa;
+  const certidaoOk=certidaoValor>=METAS_CERTIFICADO.certidao;
+  const desempenhos=[
+    desempenhoIndicadorCertificado(revPct,LIMITE_ACOMP_REVISITA,false),
+    desempenhoIndicadorCertificado(tec1Pct,LIMITE_ACOMP_TEC1,true),
+    desempenhoIndicadorCertificado(producao,META_PRODUCAO,true),
+    t1Ok?100:0,
+    desempenhoIndicadorCertificado(alfaValor,METAS_CERTIFICADO.alfa,true),
+    desempenhoIndicadorCertificado(certidaoValor,METAS_CERTIFICADO.certidao,true)
+  ];
+  const geral=desempenhos.reduce((s,v)=>s+v,0)/desempenhos.length;
+  const indicadoresBatidos=[revOk,tec1Ok,prodOk,t1Ok,alfaOk,certidaoOk].filter(Boolean).length;
+  const ok=indicadoresBatidos===desempenhos.length;
+  return `<div class="cert-desempenho-geral ${ok?"ok":"pendente"}">
+    <strong>Desempenho geral</strong>
+    <span>${pct(geral)}</span>
+    <small>${indicadoresBatidos}/${desempenhos.length} indicadores dentro da exigência</small>
+  </div>`;
+}
+function atualizarResumoIndicadoresLinhaCertificado(tr){
+  const atual=tr?.querySelector(".cert-desempenho-geral");
+  if(atual) atual.outerHTML=desempenhoGeralLinhaCertificado(tr);
+}
+function renderResumoIndicadoresCertificado(summary){
+  const tbody=$("tabelaResumoIndicadoresCertificado");
+  if(!tbody) return;
+
+  if(!summary||!Array.isArray(summary.arr)||!summary.arr.length){
+    tbody.innerHTML='<tr><td><div class="empty">Carregue a base para visualizar os indicadores.</div></td></tr>';
+    return;
+  }
+
+  const dados=carregarSistemicosCertificado();
+  tbody.innerHTML=summary.arr.map(t=>`<tr>
+    <td>
+      <div class="cert-resumo-linha">
+        <div class="cert-resumo-tecnico">${celulaTecnico(t.login)}</div>
+        ${resumoIndicadoresCertificado(t,dados)}
+      </div>
+    </td>
+  </tr>`).join("");
+}
 function inputSistemicoCertificado(login,campo,meta,dados){
   const valor=valorSistemaCertificado(dados,login,campo);
 
@@ -4831,6 +4945,7 @@ function atualizarLinhaCertificado(tr){
   if(valorEl){
     valorEl.innerHTML=htmlValorCertificado(pagamento);
   }
+  atualizarResumoIndicadoresLinhaCertificado(tr);
   tr.classList.toggle("cert-retido-linha",Number(pagamento.valorRetidoProximo)>0);
 }
 function ativarInputsCertificado(){
@@ -4855,6 +4970,7 @@ function ativarInputsCertificado(){
         badge.classList.toggle("cert-nao",!ok);
       }
       atualizarLinhaCertificado(input.closest("tr"));
+      if(currentSummary) renderResumoIndicadoresCertificado(currentSummary);
     };
     input.addEventListener("input",atualizar);
     input.addEventListener("change",atualizar);
@@ -4880,6 +4996,7 @@ function ativarInputsCertificado(){
         badge.classList.toggle("cert-nao",!ok);
       }
       atualizarLinhaCertificado(select.closest("tr"));
+      if(currentSummary) renderResumoIndicadoresCertificado(currentSummary);
     };
     select.addEventListener("change",atualizar);
   });
@@ -4959,6 +5076,7 @@ function renderTecnicoCertificado(summary){
 
   if(!summary||!Array.isArray(summary.arr)||!summary.arr.length){
     tbody.innerHTML='<tr><td colspan="9"><div class="empty">Carregue a base para visualizar os técnicos.</div></td></tr>';
+    renderResumoIndicadoresCertificado(summary);
     return;
   }
 
@@ -4980,7 +5098,7 @@ function renderTecnicoCertificado(summary){
       certidao:normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"certidao"))>=METAS_CERTIFICADO.certidao
     };
 
-    return `<tr data-cert-login="${escapeHTML(loginKey(t.login))}">
+    return `<tr data-cert-login="${escapeHTML(loginKey(t.login))}" data-rev-pct="${Number(t.revPct)||0}" data-tec1-pct="${Number(t.tec1Pct)||0}" data-tec-base="${Number(t.tecBase)||0}" data-producao="${Number(t.mediaContratos)||0}">
       <td>${celulaTecnico(t.login)}</td>
       <td>${certBadge(revOk)}</td>
       <td>${certBadge(tec1Ok)}</td>
@@ -4994,6 +5112,7 @@ function renderTecnicoCertificado(summary){
   }).join("");
 
   tbody.querySelectorAll("tr").forEach(atualizarLinhaCertificado);
+  renderResumoIndicadoresCertificado(summary);
   ativarInputsCertificado();
   aplicarBloqueioCertificado();
 }
@@ -5285,6 +5404,7 @@ function limparTudo(){
   if($("kpiTec1")) $("kpiTec1").textContent="0% / 0";
   if($("kpiLogOfensor")) $("kpiLogOfensor").textContent="0";
   if($("tabelaTecnicoCertificado")) $("tabelaTecnicoCertificado").innerHTML='<tr><td colspan="9"><div class="empty">Carregue a base para visualizar os técnicos.</div></td></tr>';
+  if($("tabelaResumoIndicadoresCertificado")) $("tabelaResumoIndicadoresCertificado").innerHTML='<tr><td><div class="empty">Carregue a base para visualizar os indicadores.</div></td></tr>';
   $("tabelaTecnicos").innerHTML='<tr><td colspan="11"><div class="empty">Carregue a base para visualizar.</div></td></tr>';
   if($("secRankingNode")) $("secRankingNode").style.display="none";
   if($("rankingNode")) $("rankingNode").innerHTML='<div class="empty">Aguardando base.</div>';
@@ -7809,6 +7929,136 @@ document.addEventListener("DOMContentLoaded",()=>{
   min-width:78px!important;
   font-size:9.4px!important;
   padding:5px 8px!important;
+}
+</style>
+
+
+<style>
+/* Planilha de resumo dos indicadores por técnico */
+#tecnicoCertificado .certificado-resumo-bloco{
+  margin-top:16px!important;
+  border-top:1px solid #dbe6f5!important;
+  padding-top:14px!important;
+}
+#tecnicoCertificado .certificado-resumo-bloco h3{
+  margin:0 0 10px!important;
+  color:#17375f!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  letter-spacing:.06em!important;
+  text-transform:uppercase!important;
+}
+#tecnicoCertificado .certificado-resumo-wrap{
+  overflow-x:auto!important;
+  border-radius:10px!important;
+}
+#tecnicoCertificado .certificado-resumo-table{
+  width:100%!important;
+  min-width:720px!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+}
+#tecnicoCertificado .certificado-resumo-table th,
+#tecnicoCertificado .certificado-resumo-table td{
+  padding:8px 10px!important;
+  border-bottom:1px solid #e6eef8!important;
+  vertical-align:middle!important;
+}
+#tecnicoCertificado .certificado-resumo-table th{
+  background:#17375f!important;
+  color:#fff!important;
+  font-size:10px!important;
+  text-transform:uppercase!important;
+  letter-spacing:.06em!important;
+  text-align:left!important;
+}
+#tecnicoCertificado .cert-resumo-linha{
+  display:grid!important;
+  grid-template-columns:minmax(150px,210px) 1fr!important;
+  gap:12px!important;
+  align-items:center!important;
+  width:100%!important;
+}
+#tecnicoCertificado .cert-resumo-tecnico{
+  min-width:0!important;
+  border-right:1px solid #e2e8f0!important;
+  padding-right:10px!important;
+}
+#tecnicoCertificado .cert-desempenho-geral{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  min-width:0!important;
+  width:100%!important;
+  padding:9px 12px!important;
+  border-radius:8px!important;
+  border:1px solid #e2e8f0!important;
+  background:#f8fafc!important;
+  color:#17375f!important;
+}
+#tecnicoCertificado .cert-desempenho-geral.ok{
+  border-color:#a7f3d0!important;
+  background:#ecfdf5!important;
+  color:#065f46!important;
+}
+#tecnicoCertificado .cert-desempenho-geral.pendente{
+  border-color:#fed7aa!important;
+  background:#fff7ed!important;
+  color:#9a3412!important;
+}
+#tecnicoCertificado .cert-desempenho-geral strong{
+  flex:0 0 auto!important;
+  font-size:10.5px!important;
+  font-weight:900!important;
+  letter-spacing:0!important;
+}
+#tecnicoCertificado .cert-desempenho-geral span{
+  flex:0 0 auto!important;
+  font-family:'IBM Plex Mono',monospace!important;
+  font-size:18px!important;
+  line-height:1!important;
+  font-weight:900!important;
+}
+#tecnicoCertificado .cert-desempenho-geral small{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  text-align:right!important;
+  opacity:.78!important;
+  font-size:9px!important;
+  font-weight:700!important;
+}
+#tecnicoCertificado .cert-export-clean .cert-desempenho-geral{
+  padding:8px 10px!important;
+}
+#tecnicoCertificado .cert-export-clean .cert-desempenho-geral span{
+  font-size:17px!important;
+}
+@media(max-width:1150px){
+  #tecnicoCertificado .certificado-resumo-table{
+    min-width:720px!important;
+  }
+}
+@media(max-width:720px){
+  #tecnicoCertificado .cert-resumo-linha{
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+  #tecnicoCertificado .cert-resumo-tecnico{
+    border-right:0!important;
+    border-bottom:1px solid #e2e8f0!important;
+    padding:0 0 7px!important;
+  }
+  #tecnicoCertificado .cert-desempenho-geral{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+  #tecnicoCertificado .cert-desempenho-geral small{
+    text-align:left!important;
+  }
 }
 </style>
 
