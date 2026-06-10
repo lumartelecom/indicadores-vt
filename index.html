@@ -5624,7 +5624,7 @@ function obterMesPlantaoDias(ano,mes){
 }
 function tecnicoFeriasNoDiaDias(tec,iso){
   if(!tec || tec.status!=="Férias") return false;
-  if(!tec.start && !tec.end) return true;
+  if(!tec.start && !tec.end) return false;
   const ini=tec.start||"0000-01-01";
   const fim=tec.end||"9999-12-31";
   return iso>=ini && iso<=fim;
@@ -6993,7 +6993,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
   function emFerias(tec,iso){
     if(!tec||tec.status!=="Férias") return false;
-    if(!tec.start&&!tec.end) return true;
+    if(!tec.start&&!tec.end) return false;
     const ini=tec.start||"0000-01-01";
     const fim=tec.end||"9999-12-31";
     return iso>=ini&&iso<=fim;
@@ -7102,11 +7102,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         tec[el.dataset.field]=el.value;
       }
       if(el.dataset.field==="status"){
-        if(el.value==="Férias"){
-          const intervalo=intervaloMesPlantao(month);
-          if(!tec.start) tec.start=intervalo.inicio;
-          if(!tec.end) tec.end=intervalo.fim;
-        }else{
+        if(el.value!=="Férias"){
           tec.start="";
           tec.end="";
         }
