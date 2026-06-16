@@ -2506,20 +2506,13 @@ let lastRenderRows=[];
 let modalTecnicosLista=[];
 let exportOverride=null;
 let tecnicoAtivoLogin="";
-let dashboardProducaoOnlineCache=null;
-let dashboardProducaoOnlineFonte="";
-let dashboardProducaoOnlineCarregando=false;
-let dashboardProducaoOnlineErro="";
 
 const STORAGE_LAST="lumar_dashboard_last_dataset_v1";
 const STORAGE_HISTORY="lumar_dashboard_history_v1";
 const STORAGE_MONTHLY="lumar_dashboard_monthly_datasets_v1";
 const DB_MONTHLY="lumar_dashboard_bases_mensais_v1";
-const DASHBOARD_PRODUCAO_ONLINE_CONFIG={
-  spreadsheetId:"1F7ZZUkY0XcDKyTQ1duFA0IflC71D5kBnbyiARV2bJXQ",
-  gid:"535121661",
-  nome:"Produção online PD"
-};
+// A produção do dashboard é calculada exclusivamente com a base importada.
+// Fórmula: SOMA(QTD_TOTAL_OS_TEC1) ÷ quantidade de DATA_AGENDA distintas.
 /*
   FIREBASE - ÚLTIMA BASE NA NUVEM / SOMENTE CLOUD FIRESTORE
 
@@ -2936,7 +2929,7 @@ function aplicarBaseSalvaEmTela(saved,opcoes={}){
     const filtrado=aplicarFiltros(processedRows);
     lastRenderRows=filtrado;
     currentSummary=processarResumo(filtrado);
-    renderDashboardComProducaoOnline(currentSummary);
+    renderDashboardComProducaoLocal(currentSummary);
 
     salvarUltimaBase(rawRows,currentFileName);
     abrirAbaDashboard();
@@ -3299,7 +3292,9 @@ async function obterRows(file){
 
 function validarBase(rows){
   const obrigatorias=[
+    ["NM_MUNICIPIO","NM MUNICIPIO","MUNICIPIO"],
     ["UNIDADE_NEGOCIO","UNIDADE NEGOCIO"],["GRUPO_ORDEM_SERVICO","GRUPO ORDEM SERVICO"],
+    ["FG_DIA_PRODUTIVO","FG DIA PRODUTIVO"],["DATA_AGENDA","DATA AGENDA"],
     ["LOGIN_TECNICO","LOGIN TECNICO","TECNICO"],["CONTRATO"],["QT_REVISITA","QT REVISITA"],
     ["NODE"],["TOTAL_OS_TEC1_PADRAO","TOTAL OS TEC1 PADRAO"],["QTD_TOTAL_OS_TEC1","QTD TOTAL OS TEC1"],
     ["TIPO_SERVICO","TIPO SERVICO","TIPO_OS","TIPO OS"]
@@ -3314,7 +3309,7 @@ function renderValidacao(validation,baseLen){
   const items=[];
   if(validation.ok) items.push(`<div class="alert greenline">✅ Todas as colunas principais foram encontradas.</div>`);
   else items.push(`<div class="alert redline">⚠️ Colunas ausentes: <strong>${validation.faltando.join(", ")}</strong>.</div>`);
-  items.push(`<div class="alert blueline">Linhas TSA-LUMAR_VT / MANUTENCAO encontradas: <strong>${baseLen}</strong>.</div>`);
+  items.push(`<div class="alert blueline">Linhas TERESINA / TSA-LUMAR_VT / MANUTENCAO encontradas: <strong>${baseLen}</strong>.</div>`);
   items.push(`<div class="alert blueline">Colunas lidas: ${validation.cols.length}.</div>`);
   el.innerHTML=items.join("");
 }
@@ -3349,192 +3344,9 @@ function preencherFiltros(rows){
   if(fn) fn.innerHTML='<option value="">Todos os nodes</option>'+nodes.map(n=>`<option value="${n}">${n}</option>`).join("");
 }
 
-function parseNumeroDashboard(v){
-  let s=norm(v).replace("%","").replace(/\s/g,"");
-  if(!s) return 0;
-  if(s.includes(",")) s=s.replace(/\./g,"").replace(",",".");
-  else if(/\.\d{3}(\D|$)/.test(s)) s=s.replace(/\./g,"");
-  const n=Number(s);
-  return Number.isFinite(n)?n:0;
-}
-function chaveNomeProducaoDashboard(nome){
-  const h=head(nome);
-  if(!h) return "";
-  if(h==="ALEX"||h.includes("ALEX_EMIDIO")) return head("Alex Emidio");
-  if(h==="KLEYTON"||h.includes("APOLINARIO")) return head("Apolinario");
-  if(h.includes("GEOVANIO")) return head("MATHEUS HENRIQUE");
-  if(h.includes("MATHEUS")&&h.includes("HENRIQUE")) return head("MATHEUS HENRIQUE");
-  if(h.includes("JOSE")&&h.includes("FRANCISCO")) return head("José Francisco");
-  if(h.includes("MATEUS")&&h.includes("REIS")) return head("Mateus Reis");
-  return h;
-}
-function indiceColunaDashboard(header,nomes){
-  const alvos=nomes.map(head);
-  return header.findIndex(c=>alvos.includes(head(c)));
-}
-function extrairProducaoOnlineDashboard(matriz){
-  const idxHeader=(Array.isArray(matriz)?matriz:[]).findIndex(row=>{
-    const heads=(row||[]).map(head);
-    return (heads.includes("TOTAL_GERAL")||heads.includes("TOTAL")) && heads.includes("DT") && heads.some(h=>h==="TECNICO"||h==="NOME"||h==="COLABORADOR"||h==="FUNCIONARIO"||h==="TECNICOS");
-  });
-  if(idxHeader<0) throw new Error("não encontrei TOTAL GERAL, DT e técnico/nome para calcular a produção");
-  const header=matriz[idxHeader]||[];
-  let idxNome=indiceColunaDashboard(header,["TECNICO","TÉCNICO","NOME","COLABORADOR","FUNCIONARIO","FUNCIONÁRIO","TECNICOS","TÉCNICOS"]);
-  let idxTotal=indiceColunaDashboard(header,["TOTAL GERAL","TOTAL_GERAL","TOTAL"]);
-  let idxDT=indiceColunaDashboard(header,["DT"]);
-  if(idxNome<0) idxNome=0;
-  if(idxTotal<0) idxTotal=32;
-  if(idxDT<0) idxDT=33;
-  if(idxNome<0||idxTotal<0||idxDT<0) throw new Error("cabeçalho sem nome/TOTAL GERAL/DT");
-  const mapa=new Map();
-  matriz.slice(idxHeader+1).forEach(row=>{
-    const nome=norm(row[idxNome]);
-    const chave=chaveNomeProducaoDashboard(nome);
-    if(!chave || head(nome).includes("TOTAL")) return;
-    const total=parseNumeroDashboard(row[idxTotal]);
-    const dt=parseNumeroDashboard(row[idxDT]);
-    const producao=dt>0?truncar(total/dt/35,2):0;
-    if(Number.isFinite(producao)&&producao>0) mapa.set(chave,producao);
-  });
-  if(!mapa.size) throw new Error("nenhuma produção calculada por TOTAL GERAL / DT / 35");
-  return mapa;
-}
-function buscarGvizJSONPDashboardProducao(){
-  return new Promise((resolve,reject)=>{
-    const cb=`__dashboardProducao_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const script=document.createElement("script");
-    let finalizado=false;
-    const limpar=()=>{
-      finalizado=true;
-      clearTimeout(timer);
-      try{delete window[cb];}catch(_){window[cb]=undefined;}
-      if(script.parentNode) script.parentNode.removeChild(script);
-    };
-    const timer=setTimeout(()=>{
-      if(finalizado) return;
-      limpar();
-      reject(new Error("tempo limite ao carregar a produção online"));
-    },7000);
-    window[cb]=(data)=>{
-      if(finalizado) return;
-      limpar();
-      if(data?.status==="error"){
-        const msg=(data.errors||[]).map(e=>e.detailed_message||e.message||e.reason).filter(Boolean).join("; ")||"erro retornado pelo Google Sheets";
-        reject(new Error(msg));
-        return;
-      }
-      const cols=data?.table?.cols||[];
-      const header=cols.map((c,i)=>norm(c?.label||c?.id||`COL_${i+1}`));
-      const rows=data?.table?.rows||[];
-      const body=rows.map(r=>{
-        const cells=r.c||[];
-        return header.map((_,i)=>{
-          const c=cells[i];
-          if(!c) return "";
-          return norm(c.f!=null?c.f:(c.v!=null?c.v:""));
-        });
-      }).filter(row=>row.some(Boolean));
-      resolve([header,...body]);
-    };
-    script.onerror=()=>{
-      if(finalizado) return;
-      limpar();
-      reject(new Error("não foi possível carregar o script da produção online"));
-    };
-    const cfg=DASHBOARD_PRODUCAO_ONLINE_CONFIG;
-    const tqx=`out:json;responseHandler:${cb}`;
-    script.src=`https://docs.google.com/spreadsheets/d/${cfg.spreadsheetId}/gviz/tq?headers=1&tqx=${encodeURIComponent(tqx)}&tq=${encodeURIComponent("select *")}&gid=${encodeURIComponent(cfg.gid)}&zx=${Date.now()}`;
-    document.head.appendChild(script);
-  });
-}
-async function buscarCSVComProxyDashboardProducao(){
-  const cfg=DASHBOARD_PRODUCAO_ONLINE_CONFIG;
-  const base=`https://docs.google.com/spreadsheets/d/${cfg.spreadsheetId}/export?format=csv&gid=${encodeURIComponent(cfg.gid)}&single=true&output=csv&zx=${Date.now()}`;
-  const fontes=[
-    {nome:"CSV direto",url:base},
-    {nome:"AllOrigins",url:`https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`},
-    {nome:"CorsProxy",url:`https://corsproxy.io/?${encodeURIComponent(base)}`}
-  ];
-  const erros=[];
-  for(const fonte of fontes){
-    try{
-      const resp=await fetchDiasComTimeout(fonte.url,{},12000);
-      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const text=await resp.text();
-      if(/<html|DOCTYPE html|Sign in|Fazer login|ServiceLogin/i.test(text)) throw new Error("retornou HTML/login em vez de CSV");
-      const matriz=parseMatrizCSV(text);
-      extrairProducaoOnlineDashboard(matriz);
-      return {matriz,fonte:fonte.nome};
-    }catch(e){
-      erros.push(`${fonte.nome}: ${e.name==="AbortError"?"tempo limite":e.message}`);
-    }
-  }
-  throw new Error(erros.join(" | "));
-}
-async function atualizarProducaoOnlineDashboard(){
-  if(dashboardProducaoOnlineCarregando) return;
-  dashboardProducaoOnlineCarregando=true;
-  dashboardProducaoOnlineErro="";
-  try{
-    let matriz=null;
-    let fonte="Google Visualization";
-    try{
-      matriz=await buscarGvizJSONPDashboardProducao();
-    }catch(eGviz){
-      const csv=await buscarCSVComProxyDashboardProducao();
-      matriz=csv.matriz;
-      fonte=csv.fonte;
-    }
-    dashboardProducaoOnlineCache=extrairProducaoOnlineDashboard(matriz);
-    dashboardProducaoOnlineFonte=`${DASHBOARD_PRODUCAO_ONLINE_CONFIG.nome} · ${fonte} · gid ${DASHBOARD_PRODUCAO_ONLINE_CONFIG.gid}`;
-    const qtd=dashboardProducaoOnlineCache.size;
-    if(typeof setStatus==="function") setStatus(`✅ Produção online atualizada por TOTAL GERAL / DT / 35: <strong>${qtd}</strong> técnico(s).`);
-    if(currentSummary) atualizarProducaoOnlineDashboardVisivel();
-    else if(lastRenderRows&&lastRenderRows.length) renderDashboard(processarResumo(lastRenderRows));
-  }catch(e){
-    dashboardProducaoOnlineErro=e.message||String(e);
-    console.warn("Dashboard: produção online indisponível",e);
-    if(typeof setStatus==="function") setStatus(`⚠️ Não consegui atualizar a produção online por TOTAL GERAL / DT / 35. Mantive o cálculo local.<br><small>${dashboardProducaoOnlineErro}</small>`);
-  }finally{
-    dashboardProducaoOnlineCarregando=false;
-  }
-}
-function garantirProducaoOnlineDashboard(){
-  if(dashboardProducaoOnlineCache||dashboardProducaoOnlineCarregando) return;
-  atualizarProducaoOnlineDashboard();
-}
-async function renderDashboardComProducaoOnline(summary){
-  if(!dashboardProducaoOnlineCache&&!dashboardProducaoOnlineCarregando){
-    await atualizarProducaoOnlineDashboard();
-  }
+// Renderização local: não consulta planilha, API ou fonte externa para produção.
+async function renderDashboardComProducaoLocal(summary){
   renderDashboard(summary);
-}
-function aplicarProducaoOnlineDashboard(summary){
-  const mapa=dashboardProducaoOnlineCache;
-  if(!summary||!Array.isArray(summary.arr)||!mapa||!mapa.size) return summary;
-  let totalProducao=0;
-  summary.arr.forEach(t=>{
-    const chave=chaveNomeProducaoDashboard(t.nome||nomeTecnico(t.login));
-    if(mapa.has(chave)){
-      const pd=Number(mapa.get(chave))||0;
-      t.mediaContratos=pd;
-      t.producao=pd;
-      t.producaoFonte="PD online";
-    }
-    totalProducao+=Number(t.producao)||0;
-  });
-  summary.totalProducao=totalProducao;
-  return summary;
-}
-function atualizarProducaoOnlineDashboardVisivel(){
-  if(!currentSummary||!dashboardProducaoOnlineCache||!dashboardProducaoOnlineCache.size) return;
-  aplicarProducaoOnlineDashboard(currentSummary);
-  renderTabelaPerformance("tabelaTecnicos",currentSummary.arr||[]);
-  renderCardsMobile(currentSummary);
-  renderRankingOperacional(currentSummary);
-  renderTecnicoCertificado(currentSummary);
-  renderPlanoAcao(currentSummary);
-  renderPlanoAcaoDetalhado(currentSummary);
 }
 
 function processarResumo(rows){
@@ -3547,10 +3359,18 @@ function processarResumo(rows){
     if(!contrato) return;
     if(!tec[login]) tec[login]={login,nome:nomeTecnico(login),producao:0,revisitas:0,total:0,tecOk:0,tecFora:0,tecBase:0,dias:new Set()};
     tec[login].total++;
+
+    // Produção oficial: soma das unidades de QTD_TOTAL_OS_TEC1.
+    // O denominador considera apenas DATA_AGENDA distintas marcadas como dia produtivo.
+    const diaProdutivo=head(getField(r,["FG_DIA_PRODUTIVO","FG DIA PRODUTIVO"]))==="S";
     const diaAgenda=dataAgendaPrincipal(r);
-    if(diaAgenda) tec[login].dias.add(diaAgenda);
+    const qtdProducao=parseNumber(getField(r,["QTD_TOTAL_OS_TEC1","QTD TOTAL OS TEC1"]));
+    if(diaProdutivo){
+      tec[login].producao+=Math.max(0,qtdProducao);
+      if(diaAgenda) tec[login].dias.add(diaAgenda);
+    }
+
     nodes[node]=(nodes[node]||0)+1;
-    if(ehProducao(r)) tec[login].producao++;
     const tecNum=parseNumber(getField(r,["TOTAL_OS_TEC1_PADRAO","TOTAL OS TEC1 PADRAO"]));
     const tecDen=parseNumber(getField(r,["QTD_TOTAL_OS_TEC1","QTD TOTAL OS TEC1"]));
     if(tecDen>0){
@@ -3576,7 +3396,8 @@ function processarResumo(rows){
   let arr=Object.values(tec).map(t=>{
     const diasAtendimento=t.dias?.size||0;
     const contratosExecutados=t.total;
-    const resumo={...t,contratosExecutados,diasAtendimento,mediaContratos:diasAtendimento?contratosExecutados/diasAtendimento:contratosExecutados,revPct:t.total?t.revisitas/t.total*100:0,tec1Pct:t.tecBase?t.tecOk/t.tecBase*100:0};
+    const mediaProducaoExata=diasAtendimento?t.producao/diasAtendimento:0;
+    const resumo={...t,contratosExecutados,diasAtendimento,mediaContratos:mediaProducaoExata,mediaProducaoExata,producaoFonte:"Base importada: QTD_TOTAL_OS_TEC1 ÷ dias distintos",revPct:t.total?t.revisitas/t.total*100:0,tec1Pct:t.tecBase?t.tecOk/t.tecBase*100:0};
     delete resumo.dias;
     resumo.vtMetaRevisita=vtParaMetaRevisita(resumo);
     resumo.vtMetaTec1=vtParaMetaTec1(resumo);
@@ -3593,7 +3414,7 @@ function processarResumo(rows){
   const totalOk=arr.reduce((a,t)=>a+t.tecOk,0);
   const totalTecBase=arr.reduce((a,t)=>a+t.tecBase,0);
   const arrNode=Object.entries(nodes).map(([node,qtd])=>{return {node,qtd}}).sort((a,b)=>b.qtd-a.qtd);
-  return aplicarProducaoOnlineDashboard({arr,arrNode,revisitas,tec1ForaPadrao,totalProducao,totalRev,totalOk,totalTecBase,baseLen:rows.length,sourceRows:[...rows]});
+  return {arr,arrNode,revisitas,tec1ForaPadrao,totalProducao,totalRev,totalOk,totalTecBase,baseLen:rows.length,sourceRows:[...rows]};
 }
 
 function renderBars(id,items,labelKey,valueKey,suffix){
@@ -3821,8 +3642,6 @@ function linhaMediaPerformance(arr){
 }
 
 function renderDashboard(summary){
-  garantirProducaoOnlineDashboard();
-  summary=aplicarProducaoOnlineDashboard(summary);
   currentSummary=summary;
   const {arr,arrNode,revisitas,tec1ForaPadrao,totalProducao,totalRev,totalOk,totalTecBase,baseLen}=summary;
 
@@ -4535,12 +4354,12 @@ function aplicarTecnicoNoDashboard(login){
   tecnicoAtivoLogin=loginKey(login);
   const filtrado=processedRows.filter(r=>loginKey(getField(r,["LOGIN_TECNICO","LOGIN TECNICO","TECNICO"]))===loginKey(login));
   lastRenderRows=filtrado;
-  renderDashboardComProducaoOnline(processarResumo(filtrado));
+  renderDashboardComProducaoLocal(processarResumo(filtrado));
 }
 function limparFiltroTecnicoAtivo(){
   tecnicoAtivoLogin="";
   lastRenderRows=[...processedRows];
-  renderDashboardComProducaoOnline(processarResumo(processedRows));
+  renderDashboardComProducaoLocal(processarResumo(processedRows));
   abrirModalTecnicos(false);
 }
 function abrirIndicadoresTecnico(login,aplicarFiltro=true){
@@ -4578,22 +4397,23 @@ async function exportarTecnico(login,tipo){
   exportOverride={tecnico:rotuloTecnico(login),node:"Todos os nodes",status:"Indicadores individuais",login};
   try{
     lastRenderRows=tecnicoRows;
-    await renderDashboardComProducaoOnline(processarResumo(tecnicoRows));
+    await renderDashboardComProducaoLocal(processarResumo(tecnicoRows));
     if(tipo==="pdf") await exportarPDF();
     else await exportarImagem();
   }finally{
     exportOverride=null;
     lastRenderRows=rowsRestaurar.length?rowsRestaurar:[...processedRows];
     if(summaryRestaurar) renderDashboard(summaryRestaurar);
-    else await renderDashboardComProducaoOnline(processarResumo(lastRenderRows));
+    else await renderDashboardComProducaoLocal(processarResumo(lastRenderRows));
   }
 }
 
 function filtrarBasePrincipal(rows){
   return rows.filter(r=>{
+    const municipio=head(getField(r,["NM_MUNICIPIO","NM MUNICIPIO","MUNICIPIO"]));
     const unidade=head(getField(r,["UNIDADE_NEGOCIO","UNIDADE NEGOCIO"]));
     const grupo=head(getField(r,["GRUPO_ORDEM_SERVICO","GRUPO ORDEM SERVICO"]));
-    return unidade==="TSA-LUMAR_VT"&&grupo==="MANUTENCAO";
+    return municipio==="TERESINA"&&unidade==="TSA-LUMAR_VT"&&grupo==="MANUTENCAO";
   });
 }
 
@@ -5242,7 +5062,7 @@ function carregarUltimaBase(opcoes={}){
     const filtrado=aplicarFiltros(processedRows);
     lastRenderRows=filtrado;
     currentSummary=processarResumo(filtrado);
-    renderDashboardComProducaoOnline(currentSummary);
+    renderDashboardComProducaoLocal(currentSummary);
 
     salvarUltimaBase(rawRows,currentFileName);
     abrirAbaDashboard();
@@ -5340,11 +5160,11 @@ async function carregarBase(){
     const validation=validarBase(rows);
     processedRows=filtrarBasePrincipal(rows);
     renderValidacao(validation,processedRows.length);
-    if(!processedRows.length){setStatus("⚠️ Não encontrei linhas com UNIDADE_NEGOCIO = TSA-LUMAR_VT e GRUPO_ORDEM_SERVICO = MANUTENCAO.");return;}
+    if(!processedRows.length){setStatus("⚠️ Não encontrei linhas com NM_MUNICIPIO = TERESINA, UNIDADE_NEGOCIO = TSA-LUMAR_VT e GRUPO_ORDEM_SERVICO = MANUTENCAO.");return;}
     preencherFiltros(processedRows);
     const filtrado=aplicarFiltros(processedRows);
     lastRenderRows=filtrado;
-    await renderDashboardComProducaoOnline(processarResumo(filtrado));
+    await renderDashboardComProducaoLocal(processarResumo(filtrado));
     const signature=salvarUltimaBase(rows,currentFileName);
     const competencia=await salvarBaseMensalLocal(rows,currentFileName,signature);
     const historicoResultado=salvarHistorico({silencioso:true,signature,competencia});
@@ -5356,7 +5176,8 @@ async function carregarBase(){
     const avisoFirebase=firebaseIndicadoresConfigurado()
       ? (salvaFirebase&&salvaCompetenciaFirebase.salvo?`<br>☁️ Base salva no Firebase/Firestore como <strong>${esc(competencia.label)}</strong>.`:`<br>⚠️ Base carregada, mas não consegui salvar todo o histórico no Firebase. Verifique config/regras do Firestore.`)
       : `<br>ℹ️ Firebase ainda não configurado. Salvando apenas neste navegador.`;
-    setStatus(`✅ Base carregada.<br>Base manutenção: <strong>${processedRows.length}</strong> | Revisitas 10d: <strong>${currentSummary.totalRev}</strong>${z450?`<br>Conferência ${z450.nome}: <strong>${z450.producao}</strong> produção e <strong>${z450.revisitas}</strong> revisitas 10d.`:""}${avisoRepetida}${avisoFirebase}`);
+    const detalheProducaoZ450=z450?`${num3(z450.producao)} unidades ÷ ${z450.diasAtendimento} dias distintos`:"";
+    setStatus(`✅ Base carregada.<br>Base manutenção: <strong>${processedRows.length}</strong> | Revisitas 10d: <strong>${currentSummary.totalRev}</strong>${z450?`<br>Conferência ${z450.nome}: <strong>${num3(z450.mediaContratos)}</strong> produção/dia (${detalheProducaoZ450}) e <strong>${z450.revisitas}</strong> revisitas 10d.`:""}${avisoRepetida}${avisoFirebase}`);
   }catch(err){console.error(err);setStatus("❌ Erro ao carregar: <strong>"+err.message+"</strong>");}
 }
 function mensagemFiltrosAplicados(qtd){
@@ -5372,7 +5193,7 @@ function mensagemFiltrosAplicados(qtd){
 async function reaplicarFiltros(){
   if(!processedRows.length){setStatus("⚠️ Carregue uma base primeiro.");return}
   const filtrado=aplicarFiltros(processedRows);lastRenderRows=filtrado;
-  await renderDashboardComProducaoOnline(processarResumo(filtrado));setStatus(mensagemFiltrosAplicados(filtrado.length));
+  await renderDashboardComProducaoLocal(processarResumo(filtrado));setStatus(mensagemFiltrosAplicados(filtrado.length));
 }
 function limparFiltros(){
   if($("filtroTecnico")) $("filtroTecnico").value="";
