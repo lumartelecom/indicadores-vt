@@ -6592,6 +6592,24 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(found) return found;
     return String(status||"").toLocaleLowerCase("pt-BR").replace(/(^|[\s–/-])([\p{L}])/gu,(m,p,c)=>p+c.toLocaleUpperCase("pt-BR"));
   }
+  function consultivoStatusFormulario(){
+    return consultivoStatusPadrao();
+  }
+  function consultivoStatusUnicos(values){
+    const map=new Map();
+    values.map(consultivoFormatStatus).filter(Boolean).forEach(status=>{
+      const key=consultivoNorm(status);
+      if(key==="cancelado") return;
+      if(!map.has(key)) map.set(key,status);
+    });
+    return [...map.values()].sort((a,b)=>{
+      const order=consultivoStatusPadrao().map(consultivoNorm);
+      const ia=order.indexOf(consultivoNorm(a));
+      const ib=order.indexOf(consultivoNorm(b));
+      if(ia!==-1||ib!==-1) return (ia===-1?999:ia)-(ib===-1?999:ib);
+      return a.localeCompare(b,"pt-BR");
+    });
+  }
   function consultivoQty(r){return Number(r.quantidade||0);}
   function consultivoValor(r){return Number(r.valor||0);}
   function consultivoInstalado(r){return consultivoNorm(r.status).includes("instalado");}
@@ -6614,11 +6632,11 @@ document.addEventListener("DOMContentLoaded",()=>{
     const s=consultivoLoad();
     s.tecnicos=consultivoTecnicosDashboard();
     s.tipos=consultivoUniq([...(s.tipos||[]),...s.records.map(r=>r.tipo)]);
-    s.statuses=consultivoUniq([...consultivoStatusPadrao(),...(s.statuses||[]),...s.records.map(r=>consultivoFormatStatus(r.status))]);
+    s.statuses=consultivoStatusUnicos([...consultivoStatusPadrao(),...(s.statuses||[]),...s.records.map(r=>r.status)]);
     consultivoFillSelect("consultivoFiltroTecnico","Todos",s.tecnicos);
     consultivoFillSelect("consultivoFiltroTipo","Todos",s.tipos);
     consultivoFillSelect("consultivoFiltroStatus","Todos",s.statuses);
-    consultivoFillSelect("consultivoStatus","Selecione",s.statuses);
+    consultivoFillSelect("consultivoStatus","Selecione",consultivoStatusFormulario());
     consultivoFillDatalist("consultivoTecnicosLista",s.tecnicos);
     consultivoFillDatalist("consultivoTiposLista",s.tipos);
     consultivoFillDatalist("consultivoStatusLista",s.statuses);
@@ -8401,6 +8419,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
 
 
 
