@@ -1328,8 +1328,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 
 /* Colunas sistêmicas mais estreitas e organizadas em duas linhas */
 #tecnicoCertificado .certificado-table tbody td:nth-child(5) .cert-input-wrap,
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-input-wrap{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap{
   display:grid!important;
   grid-template-columns:1fr!important;
   justify-items:center!important;
@@ -1528,17 +1527,14 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   color:#fff!important;
   border-color:#10213a!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-input-wrap{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap{
   gap:7px!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-field,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-percent-field{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-field{
   grid-template-columns:66px auto!important;
   gap:4px!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-input{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input{
   width:66px!important;
   min-width:66px!important;
   padding:4px 6px!important;
@@ -1547,8 +1543,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   font-weight:800!important;
   text-align:center!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-symbol,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-percent-symbol{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-symbol{
   font-size:11px!important;
 }
 /* Exportação da imagem segue o mesmo enquadramento */
@@ -1992,18 +1987,15 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   min-width:0!important;
   max-width:none!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-input-wrap{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap{
   gap:7px!important;
   overflow:visible!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-field,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-percent-field{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-field{
   grid-template-columns:72px auto!important;
   gap:4px!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-input{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input{
   width:72px!important;
   min-width:72px!important;
   max-width:72px!important;
@@ -2011,8 +2003,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
   font:800 12px/1 'IBM Plex Mono',monospace!important;
   text-align:center!important;
 }
-#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-symbol,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-percent-symbol{
+#tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-percent-symbol{
   font-size:11px!important;
 }
 #tecnicoCertificado #btnBloquearCertificado{
@@ -2488,21 +2479,20 @@ button:hover,.btn:hover{transform:translateY(-1px)}
       <div class="table-wrap certificado-table-wrap">
         <table class="certificado-table">
           <colgroup>
-            <col style="width:10.5%">
-            <col style="width:7.5%">
-            <col style="width:7.5%">
-            <col style="width:8.5%">
-            <col style="width:14%">
+            <col style="width:12%">
+            <col style="width:8%">
+            <col style="width:8%">
+            <col style="width:10%">
             <col style="width:17%">
-            <col style="width:17%">
-            <col style="width:8.5%">
-            <col style="width:9.5%">
+            <col style="width:18%">
+            <col style="width:11%">
+            <col style="width:16%">
           </colgroup>
           <thead>
             <tr>
               <th rowspan="2">Técnico</th>
               <th colspan="3" class="cert-nowrap-head">Indicadores de Campo</th>
-              <th colspan="3">Indicadores Sistêmicos</th>
+              <th colspan="2">Indicadores Sistêmicos</th>
               <th rowspan="2">Certificado</th>
               <th rowspan="2">Valor</th>
             </tr>
@@ -2511,12 +2501,11 @@ button:hover,.btn:hover{transform:translateY(-1px)}
               <th>TEC1</th>
               <th>Produtividade</th>
               <th class="cert-nowrap-head">T1 dentro do prazo</th>
-              <th class="cert-nowrap-head">Alfa Gestor atualizado</th>
               <th class="cert-nowrap-head">Certidão de Atendimento</th>
             </tr>
           </thead>
           <tbody id="tabelaTecnicoCertificado">
-            <tr><td colspan="9"><div class="empty">Carregue a base para visualizar os técnicos.</div></td></tr>
+            <tr><td colspan="8"><div class="empty">Carregue a base para visualizar os técnicos.</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -4569,14 +4558,13 @@ const STORAGE_CERTIFICADO_SISTEMICO="lumar_tecnico_certificado_sistemicos_v1";
 const STORAGE_CERTIFICADO_RETIDO="lumar_tecnico_certificado_retidos_v1";
 const STORAGE_CERTIFICADO_CICLO="lumar_tecnico_certificado_ciclo_v1";
 const STORAGE_CERTIFICADO_BLOQUEADO="lumar_tecnico_certificado_bloqueado_v1";
-const METAS_CERTIFICADO={t1:95,alfa:90,certidao:90};
-const VALORES_CERTIFICADO={revisitas:200,tec1:165,produtividade:135,certidao:100,t1:65,alfa:35};
+const METAS_CERTIFICADO={t1:95,certidao:90};
+const VALORES_CERTIFICADO={revisitas:200,tec1:165,produtividade:135,certidao:100,t1:65};
 const INDICADORES_CERTIFICADO=[
   {campo:"revisitas",label:"Revisitas"},
   {campo:"tec1",label:"TEC1"},
   {campo:"produtividade",label:"Produtividade"},
   {campo:"t1",label:"T1 prazo"},
-  {campo:"alfa",label:"Alfa Gestor"},
   {campo:"certidao",label:"Certidão"}
 ];
 
@@ -4588,8 +4576,7 @@ function valorLinhaCertificado(flags){
     +(flags.tec1?VALORES_CERTIFICADO.tec1:0)
     +(flags.produtividade?VALORES_CERTIFICADO.produtividade:0)
     +(flags.certidao?VALORES_CERTIFICADO.certidao:0)
-    +(flags.t1?VALORES_CERTIFICADO.t1:0)
-    +(flags.alfa?VALORES_CERTIFICADO.alfa:0);
+    +(flags.t1?VALORES_CERTIFICADO.t1:0);
 }
 function pillValorCertificado(v){
   return `<span class="cert-valor-pill">${moedaCertificado(v)}</span>`;
@@ -4771,7 +4758,6 @@ function calcularDesempenhoGeralCertificado(t,dados){
   const tec1Pct=Number(t.tec1Pct)||0;
   const producao=Number(t.mediaContratos)||0;
   const t1Valor=String(valorSistemaCertificado(dados,t.login,"t1")||"").trim();
-  const alfaValor=normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"alfa"));
   const certidaoValor=normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"certidao"));
   const t1Ok=t1Valor.toLowerCase()==="realizado";
   const desempenhos=[
@@ -4779,7 +4765,6 @@ function calcularDesempenhoGeralCertificado(t,dados){
     desempenhoIndicadorCertificado(tec1Pct,LIMITE_ACOMP_TEC1,true),
     desempenhoIndicadorCertificado(producao,META_PRODUCAO,true),
     t1Ok?100:0,
-    desempenhoIndicadorCertificado(alfaValor,METAS_CERTIFICADO.alfa,true),
     desempenhoIndicadorCertificado(certidaoValor,METAS_CERTIFICADO.certidao,true)
   ];
   const geral=desempenhos.reduce((s,v)=>s+v,0)/desempenhos.length;
@@ -4788,7 +4773,6 @@ function calcularDesempenhoGeralCertificado(t,dados){
     tec1Pct>=LIMITE_ACOMP_TEC1 && (Number(t.tecBase)||0)>0,
     producao>=META_PRODUCAO,
     t1Ok,
-    alfaValor>=METAS_CERTIFICADO.alfa,
     certidaoValor>=METAS_CERTIFICADO.certidao
   ].filter(Boolean).length;
   return {geral,indicadoresBatidos,total:desempenhos.length};
@@ -4808,24 +4792,21 @@ function desempenhoGeralLinhaCertificado(tr){
   const tecBase=Number(tr?.dataset?.tecBase)||0;
   const producao=Number(tr?.dataset?.producao)||0;
   const t1Valor=String(tr?.querySelector('[data-campo="t1"]')?.value||"").trim();
-  const alfaValor=normalizarPercentualCertificado(tr?.querySelector('[data-campo="alfa"]')?.value||"");
   const certidaoValor=normalizarPercentualCertificado(tr?.querySelector('[data-campo="certidao"]')?.value||"");
   const revOk=revPct<=LIMITE_ACOMP_REVISITA;
   const tec1Ok=tec1Pct>=LIMITE_ACOMP_TEC1 && tecBase>0;
   const prodOk=producao>=META_PRODUCAO;
   const t1Ok=t1Valor.toLowerCase()==="realizado";
-  const alfaOk=alfaValor>=METAS_CERTIFICADO.alfa;
   const certidaoOk=certidaoValor>=METAS_CERTIFICADO.certidao;
   const desempenhos=[
     desempenhoIndicadorCertificado(revPct,LIMITE_ACOMP_REVISITA,false),
     desempenhoIndicadorCertificado(tec1Pct,LIMITE_ACOMP_TEC1,true),
     desempenhoIndicadorCertificado(producao,META_PRODUCAO,true),
     t1Ok?100:0,
-    desempenhoIndicadorCertificado(alfaValor,METAS_CERTIFICADO.alfa,true),
     desempenhoIndicadorCertificado(certidaoValor,METAS_CERTIFICADO.certidao,true)
   ];
   const geral=desempenhos.reduce((s,v)=>s+v,0)/desempenhos.length;
-  const indicadoresBatidos=[revOk,tec1Ok,prodOk,t1Ok,alfaOk,certidaoOk].filter(Boolean).length;
+  const indicadoresBatidos=[revOk,tec1Ok,prodOk,t1Ok,certidaoOk].filter(Boolean).length;
   const ok=indicadoresBatidos===desempenhos.length;
   return `<div class="cert-desempenho-geral ${ok?"ok":"pendente"}">
     <strong>Desempenho geral</strong>
@@ -4894,8 +4875,7 @@ function atualizarLinhaCertificado(tr){
     tec1:lerOk(2),
     produtividade:lerOk(3),
     t1:lerOk(4),
-    alfa:lerOk(5),
-    certidao:lerOk(6)
+    certidao:lerOk(5)
   };
   const final=tr.querySelector(".certificado-final");
   const valorEl=tr.querySelector(".cert-valor-final");
@@ -5042,7 +5022,7 @@ function renderTecnicoCertificado(summary){
   if(!tbody) return;
 
   if(!summary||!Array.isArray(summary.arr)||!summary.arr.length){
-    tbody.innerHTML='<tr><td colspan="9"><div class="empty">Carregue a base para visualizar os técnicos.</div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="8"><div class="empty">Carregue a base para visualizar os técnicos.</div></td></tr>';
     renderResumoIndicadoresCertificado(summary);
     return;
   }
@@ -5054,14 +5034,12 @@ function renderTecnicoCertificado(summary){
     const prodOk=(Number(t.mediaContratos)||0)>=META_PRODUCAO;
 
     const t1Html=inputSistemicoCertificado(t.login,"t1",METAS_CERTIFICADO.t1,dados);
-    const alfaHtml=inputSistemicoCertificado(t.login,"alfa",METAS_CERTIFICADO.alfa,dados);
     const certidaoHtml=inputSistemicoCertificado(t.login,"certidao",METAS_CERTIFICADO.certidao,dados);
     const flagsIniciais={
       revisitas:revOk,
       tec1:tec1Ok,
       produtividade:prodOk,
       t1:String(valorSistemaCertificado(dados,t.login,"t1")||"").trim().toLowerCase()==="realizado",
-      alfa:normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"alfa"))>=METAS_CERTIFICADO.alfa,
       certidao:normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"certidao"))>=METAS_CERTIFICADO.certidao
     };
 
@@ -5071,7 +5049,6 @@ function renderTecnicoCertificado(summary){
       <td>${certBadge(tec1Ok)}</td>
       <td>${certBadge(prodOk)}</td>
       <td>${t1Html}</td>
-      <td>${alfaHtml}</td>
       <td>${certidaoHtml}</td>
       <td>${certBadge(false,"certificado-final")}</td>
       <td><div class="cert-valor-final">${htmlValorCertificado(calcularPagamentoCertificado(t.login,flagsIniciais,competenciaCertificado(),{salvar:false}))}</div></td>
@@ -8261,13 +8238,11 @@ document.addEventListener("DOMContentLoaded",()=>{
 }
 #tecnicoCertificado .certificado-final{min-width:48px!important;}
 
-/* força T1, Alfa e Certidão a ficarem lado a lado */
+/* força T1 e Certidão a ficarem lado a lado */
 #tecnicoCertificado .certificado-table tbody td:nth-child(5) .cert-input-wrap,
 #tecnicoCertificado .certificado-table tbody td:nth-child(6) .cert-input-wrap,
-#tecnicoCertificado .certificado-table tbody td:nth-child(7) .cert-input-wrap,
 #tecnicoCertificado .cert-export-clean .certificado-table tbody td:nth-child(5) .cert-input-wrap,
-#tecnicoCertificado .cert-export-clean .certificado-table tbody td:nth-child(6) .cert-input-wrap,
-#tecnicoCertificado .cert-export-clean .certificado-table tbody td:nth-child(7) .cert-input-wrap{
+#tecnicoCertificado .cert-export-clean .certificado-table tbody td:nth-child(6) .cert-input-wrap{
   display:inline-flex!important;
   align-items:center!important;
   justify-content:center!important;
