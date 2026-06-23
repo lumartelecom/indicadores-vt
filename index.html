@@ -2552,10 +2552,10 @@ button:hover,.btn:hover{transform:translateY(-1px)}
     </section>
 
     <section class="kpis consultivo-kpis">
-      <div class="kpi-card"><div class="kpi-label">Registros</div><div class="kpi-value" id="consultivoKpiRegistros">0</div><div class="kpi-sub">linhas filtradas</div></div>
-      <div class="kpi-card"><div class="kpi-label">Indicações</div><div class="kpi-value" id="consultivoKpiIndicacoes">0</div><div class="kpi-sub">quantidade total</div></div>
-      <div class="kpi-card"><div class="kpi-label">Instalados</div><div class="kpi-value" id="consultivoKpiInstalados">0</div><div class="kpi-sub">quantidade instalada</div></div>
-      <div class="kpi-card"><div class="kpi-label">Pendentes</div><div class="kpi-value" id="consultivoKpiPendentes">0</div><div class="kpi-sub">em aberto</div></div>
+      <button class="kpi-card clickable-card kpi-button" id="consultivoCardRegistros" type="button" aria-label="Abrir detalhes de registros"><div class="kpi-label">Registros</div><div class="kpi-value" id="consultivoKpiRegistros">0</div><div class="kpi-sub">linhas filtradas</div></button>
+      <button class="kpi-card clickable-card kpi-button" id="consultivoCardIndicacoes" type="button" aria-label="Abrir detalhes de indicações"><div class="kpi-label">Indicações</div><div class="kpi-value" id="consultivoKpiIndicacoes">0</div><div class="kpi-sub">quantidade total</div></button>
+      <button class="kpi-card clickable-card kpi-button" id="consultivoCardInstalados" type="button" aria-label="Abrir detalhes de instalados"><div class="kpi-label">Instalados</div><div class="kpi-value" id="consultivoKpiInstalados">0</div><div class="kpi-sub">quantidade instalada</div></button>
+      <button class="kpi-card clickable-card kpi-button" id="consultivoCardPendentes" type="button" aria-label="Abrir detalhes de pendentes"><div class="kpi-label">Pendentes</div><div class="kpi-value" id="consultivoKpiPendentes">0</div><div class="kpi-sub">em aberto</div></button>
       <div class="kpi-card"><div class="kpi-label">Valor</div><div class="kpi-value" id="consultivoKpiValor">R$ 0</div><div class="kpi-sub">somente instalados</div></div>
       <div class="kpi-card"><div class="kpi-label">Conversão</div><div class="kpi-value" id="consultivoKpiConversao">0%</div><div class="kpi-sub">qtd. instalada / indicada</div></div>
     </section>
@@ -6765,6 +6765,50 @@ document.addEventListener("DOMContentLoaded",()=>{
       <td><div class="consultivo-row-actions"><button class="secondary" type="button" onclick="consultivoEditar('${r.id}')">Editar</button><button class="danger" type="button" onclick="consultivoExcluir('${r.id}')">Excluir</button></div></td>
     </tr>`).join("");
   }
+  function abrirModalConsultivoKpi(tipo){
+    const modal=$("modalIndicadorDetalhe");
+    const conteudo=$("modalIndicadorConteudo");
+    if(!modal||!conteudo) return;
+    const base=Array.isArray(consultivoFiltrado)?consultivoFiltrado:(consultivoLoad().records||[]);
+    const config={
+      registros:{titulo:"Registros",sub:"Todos os lançamentos do Consultivo conforme os filtros atuais.",rows:base,valor:base.length,rotulo:"Registros"},
+      indicacoes:{titulo:"Indicações",sub:"Quantidade indicada e lista completa de indicações conforme os filtros atuais.",rows:base,valor:base.reduce((s,r)=>s+consultivoQty(r),0),rotulo:"Indicações"},
+      instalados:{titulo:"Instalados",sub:"Lançamentos concluídos como instalado conforme os filtros atuais.",rows:base.filter(r=>consultivoCategoriaStatus(r.status)==="Instalado"),valor:base.reduce((s,r)=>s+consultivoQtyInstalada(r),0),rotulo:"Instalados"},
+      pendentes:{titulo:"Pendentes",sub:"Lançamentos ainda em aberto conforme os filtros atuais.",rows:base.filter(consultivoPendente),valor:base.filter(consultivoPendente).length,rotulo:"Pendentes"}
+    }[tipo];
+    if(!config) return;
+    const qtdTotal=config.rows.reduce((s,r)=>s+consultivoQty(r),0);
+    const valorTotal=config.rows.reduce((s,r)=>s+consultivoValorProdutivo(r),0);
+    const linhas=config.rows.length?config.rows.map(r=>`<tr>
+      <td><strong class="tech-name">${consultivoEsc(consultivoNomeDashboard(r.tecnico))}</strong></td>
+      <td>${consultivoEsc(r.contrato||"-")}</td>
+      <td>${consultivoFmtDate(r.dataIndicacao)}</td>
+      <td>${consultivoFmtDate(r.dataInstalacao)}</td>
+      <td>${consultivoEsc(r.tipo||"-")}</td>
+      <td><span class="consultivo-status ${consultivoCategoriaClass(r.status)}">${consultivoEsc(consultivoCategoriaStatus(r.status))}</span></td>
+      <td>${consultivoInt.format(consultivoQty(r))}</td>
+      <td>${consultivoMoney.format(consultivoValor(r))}</td>
+      <td>${consultivoEsc([consultivoStatusDetalhe(r),r.observacao].filter(Boolean).join(" · ")||"-")}</td>
+    </tr>`).join(""):'<tr><td colspan="9"><div class="empty">Nenhuma informação encontrada.</div></td></tr>';
+    $("modalIndicadorTitulo").textContent=config.titulo;
+    $("modalIndicadorSub").textContent=config.sub;
+    conteudo.innerHTML=`<div class="base-total-table">
+      <div class="base-total-resumo">
+        <span class="base-total-chip active">${config.rotulo}: ${consultivoInt.format(config.valor)}</span>
+        <span class="base-total-chip">Linhas: ${consultivoInt.format(config.rows.length)}</span>
+        <span class="base-total-chip">Qtd.: ${consultivoInt.format(qtdTotal)}</span>
+        <span class="base-total-chip">Valor instalado: ${consultivoMoney.format(valorTotal)}</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Técnico</th><th>Contrato</th><th>Indicação</th><th>Instalação</th><th>Serviço</th><th>Status</th><th>Qtd.</th><th>Valor</th><th>Observação</th></tr></thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>
+    </div>`;
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden","false");
+  }
   function consultivoGroup(key){
     const map=new Map();
     if(key==="tecnico"){
@@ -7140,7 +7184,11 @@ document.addEventListener("DOMContentLoaded",()=>{
       consultivoSave(); consultivoSyncLists(); consultivoResetForm(); consultivoAplicarFiltros();
     });
     $("consultivoCancelarEdicao")?.addEventListener("click",consultivoResetForm);
-        $("consultivoExportExcel")?.addEventListener("click",consultivoExportExcel);
+    $("consultivoCardRegistros")?.addEventListener("click",()=>abrirModalConsultivoKpi("registros"));
+    $("consultivoCardIndicacoes")?.addEventListener("click",()=>abrirModalConsultivoKpi("indicacoes"));
+    $("consultivoCardInstalados")?.addEventListener("click",()=>abrirModalConsultivoKpi("instalados"));
+    $("consultivoCardPendentes")?.addEventListener("click",()=>abrirModalConsultivoKpi("pendentes"));
+    $("consultivoExportExcel")?.addEventListener("click",consultivoExportExcel);
     $("consultivoExportCsv")?.addEventListener("click",()=>consultivoDownload("controle-consultivo.csv",consultivoToCsv(consultivoLoad().records),"text/csv;charset=utf-8"));
     $("consultivoBackupJson")?.addEventListener("click",()=>consultivoDownload("controle-consultivo-backup.json",JSON.stringify(consultivoLoad(),null,2),"application/json;charset=utf-8"));
     $("consultivoRestore")?.addEventListener("click",()=>{if(confirm("Limpar alterações locais e restaurar a base inicial do Consultivo?")){localStorage.removeItem(CONSULTIVO_STORAGE_KEY);consultivoState=null;consultivoLoad();consultivoSyncLists();consultivoResetForm();consultivoAplicarFiltros();}});
@@ -8728,10 +8776,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
-
-
-
-
 
 
 
