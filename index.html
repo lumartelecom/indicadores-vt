@@ -2586,6 +2586,10 @@ button:hover,.btn:hover{transform:translateY(-1px)}
           <label for="consultivoFiltroTabelaTecnico">Filtrar lançamentos por técnico</label>
           <select id="consultivoFiltroTabelaTecnico"><option value="">Todos os técnicos</option></select>
         </div>
+        <div class="consultivo-table-filter">
+          <label for="consultivoFiltroTabelaStatus">Filtrar lançamentos por status</label>
+          <select id="consultivoFiltroTabelaStatus"><option value="">Todos os status</option></select>
+        </div>
       </div>
       <div class="table-wrap">
         <table>
@@ -6644,6 +6648,20 @@ document.addEventListener("DOMContentLoaded",()=>{
       return a.localeCompare(b,"pt-BR");
     });
   }
+  function consultivoStatusCadastrados(s){
+    const map=new Map();
+    [...(s?.statuses||[]),...(s?.records||[]).map(r=>r.status)].map(consultivoFormatStatus).filter(Boolean).forEach(status=>{
+      const key=consultivoNorm(status);
+      if(!map.has(key)) map.set(key,status);
+    });
+    const order=[...consultivoStatusPadrao(),"Cancelado"].map(consultivoNorm);
+    return [...map.values()].sort((a,b)=>{
+      const ia=order.indexOf(consultivoNorm(a));
+      const ib=order.indexOf(consultivoNorm(b));
+      if(ia!==-1||ib!==-1) return (ia===-1?999:ia)-(ib===-1?999:ib);
+      return a.localeCompare(b,"pt-BR");
+    });
+  }
   function consultivoQty(r){return Number(r.quantidade||0);}
   function consultivoValor(r){return Number(r.valor||0);}
   function consultivoCategoriaStatus(status){
@@ -6702,6 +6720,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     s.statuses=consultivoStatusUnicos([...consultivoStatusPadrao(),...(s.statuses||[]),...s.records.map(r=>r.status)]);
     consultivoFillSelect("consultivoFiltroTecnico","Todos",s.tecnicos);
     consultivoFillSelect("consultivoFiltroTabelaTecnico","Todos os técnicos",s.tecnicos);
+    consultivoFillSelect("consultivoFiltroTabelaStatus","Todos os status",consultivoStatusCadastrados(s));
     consultivoFillSelect("consultivoFiltroTipo","Todos",s.tipos);
     consultivoFillSelect("consultivoTipo","Selecione",s.tipos);
     consultivoFillSelect("consultivoFiltroStatus","Todos",["Instalado","Pendente","Não concluído"]);
@@ -6722,6 +6741,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const tecnico=$("consultivoFiltroTecnico")?.value||"";
     const tecnicoTabela=$("consultivoFiltroTabelaTecnico")?.value||"";
     const status=$("consultivoFiltroStatus")?.value||"";
+    const statusTabela=$("consultivoFiltroTabelaStatus")?.value||"";
     const tipo=$("consultivoFiltroTipo")?.value||"";
     const ini=$("consultivoDataInicio")?.value||"";
     const fim=$("consultivoDataFim")?.value||"";
@@ -6729,7 +6749,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       const hay=consultivoNorm([r.tecnico,r.contrato,r.tipo,r.status,r.observacao].join(" "));
       const data=r.dataIndicacao||r.dataInstalacao||"";
       const nomeTecnico=consultivoNomeDashboard(r.tecnico);
-      return (!q||hay.includes(q))&&(!tecnico||nomeTecnico===tecnico)&&(!tecnicoTabela||nomeTecnico===tecnicoTabela)&&(!status||consultivoCategoriaStatus(r.status)===status)&&(!tipo||r.tipo===tipo)&&(!ini||data>=ini)&&(!fim||data<=fim);
+      const statusRegistro=consultivoFormatStatus(r.status);
+      return (!q||hay.includes(q))&&(!tecnico||nomeTecnico===tecnico)&&(!tecnicoTabela||nomeTecnico===tecnicoTabela)&&(!status||consultivoCategoriaStatus(r.status)===status)&&(!statusTabela||statusRegistro===statusTabela)&&(!tipo||r.tipo===tipo)&&(!ini||data>=ini)&&(!fim||data<=fim);
     });
     consultivoRender();
   }
@@ -7159,7 +7180,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   function consultivoInit(){
     if(!$("consultivo")) return;
     consultivoLoad(); consultivoSyncLists(); consultivoResetForm();
-    ["consultivoBusca","consultivoFiltroTecnico","consultivoFiltroTabelaTecnico","consultivoFiltroStatus","consultivoFiltroTipo","consultivoDataInicio","consultivoDataFim"].forEach(id=>$(id)?.addEventListener("input",consultivoAplicarFiltros));
+    ["consultivoBusca","consultivoFiltroTecnico","consultivoFiltroTabelaTecnico","consultivoFiltroTabelaStatus","consultivoFiltroStatus","consultivoFiltroTipo","consultivoDataInicio","consultivoDataFim"].forEach(id=>$(id)?.addEventListener("input",consultivoAplicarFiltros));
     $("consultivoTipo")?.addEventListener("change",()=>consultivoAplicarValorServico(true));
     $("consultivoDataInstalacao")?.addEventListener("change",()=>{
       const statusEl=$("consultivoStatus");
@@ -8776,8 +8797,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
-
-
 
 
 
