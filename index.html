@@ -7006,7 +7006,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     dash["!rows"]=[{hpt:28},null,{hpt:22},{hpt:28},{hpt:28},null,{hpt:22},{hpt:28},{hpt:28},null,{hpt:24}];
     consultivoSetCell(dash,"A1","DASHBOARD CONSULTIVO",dashTitleStyle);
     [["A3","TOTAL"],["C3","INSTALADOS"],["E3","PENDENTES"],["G3","NÃO CONCLUÍDOS"],["A7","VALOR TOTAL"],["C7","CONVERSÃO"]].forEach(([a,v])=>consultivoSetCell(dash,a,v,dashCardLabelStyle));
-    [["A4",`COUNTIF(${lr("B")},"<>")`,"0"],["C4",`COUNTIFS(${lr("H")},"INSTALADO",${lr("B")},"<>")`,"0"],["E4",`COUNTIFS(${lr("H")},"PENDENTE",${lr("B")},"<>")`,"0"],["G4",`COUNTIFS(${lr("H")},"NÃO CONCLUÍDO",${lr("B")},"<>")`,"0"],["A8",`SUM(${lr("E")})`,moneyFmt],["C8","IFERROR(C4/A4,0)","0.0%"]].forEach(([a,f,z])=>consultivoSetCell(dash,a,{f},dashCardValueStyle,z));
+    [["A4",`COUNTIF(${lr("B")},"<>")`,"0"],["C4",`SUMIFS(${lr("G")},${lr("H")},"INSTALADO",${lr("B")},"<>")`,"0"],["E4",`COUNTIFS(${lr("H")},"PENDENTE",${lr("B")},"<>")`,"0"],["G4",`COUNTIFS(${lr("H")},"NÃO CONCLUÍDO",${lr("B")},"<>")`,"0"],["A8",`SUMIFS(${lr("E")},${lr("H")},"INSTALADO")`,moneyFmt],["C8","IFERROR(C4/A4,0)","0.0%"]].forEach(([a,f,z])=>consultivoSetCell(dash,a,{f},dashCardValueStyle,z));
     consultivoSetCell(dash,"A11","STATUS GERAL",dashSectionStyle);
     consultivoSetCell(dash,"E11","RANKING POR TÉCNICO",dashSectionStyle);
     ["Status","Qtd.","Participação","Barra"].forEach((v,i)=>consultivoSetCell(dash,XLSX.utils.encode_cell({r:11,c:i}),v,dashCardLabelStyle));
@@ -7021,7 +7021,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     tecnicos.slice(0,10).forEach((tec,idx)=>{
       const row=13+idx;
       consultivoSetCell(dash,`E${row}`,tec,dashBodyStyle("#FFFFFF","left"));
-      consultivoSetCell(dash,`F${row}`,{f:`COUNTIFS(${lr("A")},E${row},${lr("H")},"INSTALADO")`},dashBodyStyle("#FFFFFF","center"),"0");
+      consultivoSetCell(dash,`F${row}`,{f:`SUMIFS(${lr("G")},${lr("A")},E${row},${lr("H")},"INSTALADO")`},dashBodyStyle("#FFFFFF","center"),"0");
       consultivoSetCell(dash,`G${row}`,{f:`IFERROR(COUNTIFS(${lr("A")},E${row},${lr("D")},"<>")/COUNTIFS(${lr("A")},E${row},${lr("C")},"<>"),0)`},dashBodyStyle("#FFFFFF","center"),"0.0%");
       consultivoSetCell(dash,`H${row}`,{f:`IF(G${row}>0,REPT("█",ROUND(G${row}*20,0)),"")`},consultivoCellStyle("#FFFFFF",true,"#146CFF","left",11,"Carlito",false));
     });
@@ -7084,16 +7084,16 @@ document.addEventListener("DOMContentLoaded",()=>{
     resumo["!cols"]=[{wch:36},{wch:15},{wch:15},{wch:15},{wch:15},{wch:18},{wch:15},{wch:20},{wch:4},{wch:23},{wch:15},{wch:18}];
     consultivoSetCell(resumo,"A1","PAINEL DE CONTROLE DE QUANTIDADE",resumoTitleStyle);
     [["A3","TOTAL DE REGISTROS"],["C3","INDICAÇÕES"],["E3","INSTALAÇÕES"],["G3","CANCELADOS"],["I3","VALOR TOTAL"],["K3","CONVERSÃO"]].forEach(([a,v])=>consultivoSetCell(resumo,a,v,resumoKpiHeaderStyle));
-    [["A4",`COUNTIF(${lr("B")},"<>")`,"0"],["C4",`COUNT(${lr("C")})`,"0"],["E4",`COUNT(${lr("D")})`,"0"],["G4",`COUNTIF(${lr("H")},"CANCELADO")`,"0"],["I4",`SUM(${lr("E")})`,moneyFmt],["K4",`IFERROR(COUNT(${lr("D")})/COUNT(${lr("C")}),0)`,"0.0%"]].forEach(([a,f,z])=>consultivoSetCell(resumo,a,{f},resumoKpiValueStyle,z));
+    [["A4",`COUNTIF(${lr("B")},"<>")`,"0"],["C4",`COUNT(${lr("C")})`,"0"],["E4",`SUMIFS(${lr("G")},${lr("H")},"INSTALADO")`,"0"],["G4",`COUNTIF(${lr("H")},"CANCELADO")`,"0"],["I4",`SUMIFS(${lr("E")},${lr("H")},"INSTALADO")`,moneyFmt],["K4",`IFERROR(E4/C4,0)`,"0.0%"]].forEach(([a,f,z])=>consultivoSetCell(resumo,a,{f},resumoKpiValueStyle,z));
     ["TÉCNICO","INDICAÇÕES","INSTALAÇÕES","PENDENTES","QUANTIDADE","VALOR TOTAL","CONVERSÃO","DESEMPENHO"].forEach((h,i)=>consultivoSetCell(resumo,XLSX.utils.encode_cell({r:6,c:i}),h,resumoHeaderStyle));
     tecnicos.forEach((tec,idx)=>{
       const row=8+idx, rr=row-1, even=row%2===0;
       consultivoSetCell(resumo,`A${row}`,tec,resumoBodyStyle(even,"left"));
       consultivoSetCell(resumo,`B${row}`,{f:`COUNTIFS(${lr("A")},$A${row},${lr("C")},"<>")`},resumoBodyStyle(even),"0");
-      consultivoSetCell(resumo,`C${row}`,{f:`COUNTIFS(${lr("A")},$A${row},${lr("D")},"<>")`},resumoBodyStyle(even),"0");
+      consultivoSetCell(resumo,`C${row}`,{f:`SUMIFS(${lr("G")},${lr("A")},$A${row},${lr("H")},"INSTALADO")`},resumoBodyStyle(even),"0");
       consultivoSetCell(resumo,`D${row}`,{f:`COUNTIFS(${lr("A")},$A${row},${lr("H")},"PENDENTE")`},resumoBodyStyle(even),"0");
-      consultivoSetCell(resumo,`E${row}`,{f:`SUMIFS(${lr("G")},${lr("A")},$A${row})`},resumoBodyStyle(even),"0");
-      consultivoSetCell(resumo,`F${row}`,{f:`SUMIFS(${lr("E")},${lr("A")},$A${row})`},resumoBodyStyle(even),moneyFmt);
+      consultivoSetCell(resumo,`E${row}`,{f:`SUMIFS(${lr("G")},${lr("A")},$A${row},${lr("H")},"INSTALADO")`},resumoBodyStyle(even),"0");
+      consultivoSetCell(resumo,`F${row}`,{f:`SUMIFS(${lr("E")},${lr("A")},$A${row},${lr("H")},"INSTALADO")`},resumoBodyStyle(even),moneyFmt);
       consultivoSetCell(resumo,`G${row}`,{f:`IFERROR(C${row}/B${row},0)`},resumoBodyStyle(even),"0.0%");
       consultivoSetCell(resumo,`H${row}`,{f:`IF(G${row}>0,REPT("█",ROUND(G${row}*20,0)),"")`},resumoBarStyle);
     });
@@ -7109,8 +7109,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     servicos.forEach((serv,idx)=>{
       const row=4+idx;
       consultivoSetCell(produtos,`A${row}`,serv,resumoBodyStyle(false,"left"));
-      consultivoSetCell(produtos,`B${row}`,{f:`COUNTIFS(${lr("F")},A${row},${lr("B")},"<>")`},resumoBodyStyle(false,"center"),"0");
-      consultivoSetCell(produtos,`C${row}`,{f:`SUMIFS(${lr("E")},${lr("F")},A${row})`},resumoBodyStyle(false,"center"),moneyFmt);
+      consultivoSetCell(produtos,`B${row}`,{f:`SUMIFS(${lr("G")},${lr("F")},A${row},${lr("H")},"INSTALADO")`},resumoBodyStyle(false,"center"),"0");
+      consultivoSetCell(produtos,`C${row}`,{f:`SUMIFS(${lr("E")},${lr("F")},A${row},${lr("H")},"INSTALADO")`},resumoBodyStyle(false,"center"),moneyFmt);
       consultivoSetCell(produtos,`D${row}`,{f:`IFERROR(B${row}/SUM($B$4:$B$${3+servicos.length}),0)`},resumoBodyStyle(false,"center"),"0.0%");
       consultivoSetCell(produtos,`E${row}`,{f:`IFERROR(C${row}/B${row},0)`},resumoBodyStyle(false,"center"),moneyFmt);
       consultivoSetCell(produtos,`F${row}`,{f:`IF(D${row}>0,REPT("█",ROUND(D${row}*20,0)),"")`},resumoBarStyle);
