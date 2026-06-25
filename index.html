@@ -605,6 +605,9 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 
 .status-wrap-historico{max-width:none;padding:0 0 14px;margin:0}
 #historico .historico-import-bar{margin:14px 0 4px;padding:12px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.72)}
+#historico .nr35-import-bar{margin-top:10px;background:#f8fafc}
+#historico .nr35-import-bar label{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--navy)}
+#nr35BaseStatus{font-size:12px;color:var(--text-muted);font-weight:700}
 .historico-competencia-bar{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin:14px 0;padding:12px;border:1px solid var(--border);border-radius:10px;background:#f7fbff}
 .historico-competencia-bar label{display:grid;gap:5px;min-width:240px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
 .historico-competencia-bar select{min-width:240px}
@@ -2168,8 +2171,8 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 <div class="container">
 
 <div class="tabs">
-  <button class="tab-btn" data-tab="nr35">Dashboard</button>
-  <button class="tab-btn active" data-tab="performance_tecnico">Performance por Técnico</button>
+  <button class="tab-btn active" data-tab="nr35">Dashboard</button>
+  <button class="tab-btn" data-tab="performance_tecnico">Performance por Técnico</button>
   <button class="tab-btn" data-tab="acao">Plano de Ação</button>
   <button class="tab-btn" data-tab="dias">Dias Trabalhados</button>
   <button class="tab-btn" data-tab="plantoes">Plantões</button>
@@ -2179,7 +2182,7 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 </div>
 
 <!-- DASHBOARD -->
-<section id="nr35" class="tab-panel">
+<section id="nr35" class="tab-panel active">
   <div class="card">
     <div class="section-title-line">
       <h2>Controle por Técnico</h2>
@@ -2253,6 +2256,151 @@ const contatosPorTecnico = {
 const contratosPorOsNR35 = {"2642076667":"2206210","2640649009":"1854340","2639253514":"2364028","2641850622":"1725841","2641866360":"50921742","2639917566":"2248656","2641876260":"2279349","2641077690":"2320608","2641933499":"2206066","2641778182":"2411360","2639525460":"1937946","2639805258":"2123780","2639314589":"8223434","2639544618":"2374112","2639513579":"1403976","2639456418":"8664660","2641615889":"1763344","2639995090":"2420351","2641355037":"2202494","2641421479":"1841671","2639832180":"2055718","2641564231":"2071837","2640187499":"2358826","2641410130":"1976798","2639597649":"1899009","2639778729":"8664660","2641223884":"2362629","2639485667":"8607372","2639948100":"6055127","2639143725":"1916477","2639462707":"2335923","2641586943":"2282005","2641460944":"2228876","2639635305":"2109036","2639870957":"2156913","2641637333":"2036810","2639267104":"2088730","2640713483":"50523719","2640057990":"1959567","2641610457":"2282013","2641638996":"2286680","2640088792":"2194602","2641836693":"8261204","2638668344":"8656845","2641824937":"2024120","2639402903":"8240614","2639713087":"8649296","2640068138":"1343540","2641833982":"2390584","2640191517":"1887906","2641960893":"2418810","2639208109":"2002622","2640171762":"1693087","2640946751":"1505957","2639616584":"2156328","2639205049":"2239177","2638975222":"8299023","2641468885":"2007284","2641279852":"1693087","2641857023":"2259372","2640601894":"2281513","2639864264":"2211469","2641389371":"9013670","2640859631":"2411360","2640765288":"2010471","2640638681":"2416028","2640514998":"2398747","2639340016":"1760965","2640657446":"2401551","2639345404":"1433468","2641408654":"50934849","2640160962":"1193394","2641356634":"2205000","2640882402":"2219842","2640530200":"2058008","2641281215":"1230460","2642031309":"2350310","2640631527":"1819684","2642086220":"1644124","2641627073":"2153124","2641933039":"1523475","2641854424":"6004344","2640646871":"2415560","2641303401":"1960492","2641388099":"2002622","2640567479":"2308918","2641344327":"8646785","2641409622":"1543999","2641306000":"1397674","2640931351":"1923643","2640912440":"2392242","2641088636":"1907745","2641103959":"2413312","2640950969":"8233642","2640949765":"8278549","2640927604":"1891504"};
 const codBaixaPorOsNR35 = {"2642076667":"203","2640649009":"203","2639253514":"566","2641850622":"566","2641866360":"566","2639917566":"566","2641876260":"203","2641077690":"203","2641933499":"203","2641778182":"545","2639525460":"203","2639805258":"566","2639314589":"203","2639544618":"566","2639513579":"203","2639456418":"203","2641615889":"566","2639995090":"566","2641355037":"203","2641421479":"203","2639832180":"203","2641564231":"566","2640187499":"566","2641410130":"203","2639597649":"203","2639778729":"203","2641223884":"203","2639485667":"203","2639948100":"566","2639143725":"203","2639462707":"203","2641586943":"566","2641460944":"566","2639635305":"203","2639870957":"203","2641637333":"203","2639267104":"566","2640713483":"203","2640057990":"562","2641610457":"203","2641638996":"203","2640088792":"566","2641836693":"203","2638668344":"566","2641824937":"203","2639402903":"203","2639713087":"566","2640068138":"203","2641833982":"566","2640191517":"566","2641960893":"566","2639208109":"566","2640171762":"203","2640946751":"203","2639616584":"566","2639205049":"203","2638975222":"203","2641468885":"203","2641279852":"203","2641857023":"203","2640601894":"566","2639864264":"203","2641389371":"203","2640859631":"566","2640765288":"566","2640638681":"562","2640514998":"203","2639340016":"203","2640657446":"203","2639345404":"203","2641408654":"203","2640160962":"203","2641356634":"203","2640882402":"566","2640530200":"203","2641281215":"562","2642031309":"566","2640631527":"562","2642086220":"203","2641627073":"203","2641933039":"203","2641854424":"566","2640646871":"203","2641303401":"566","2641388099":"203","2640567479":"203","2641344327":"203","2641409622":"203","2641306000":"203","2640931351":"203","2640912440":"566","2641088636":"203","2641103959":"203","2640950969":"203","2640949765":"203","2640927604":"203"};
 
+const STORAGE_NR35_BASE="lumar_nr35_base_v1";
+const ORDEM_NR35=["Z132322","Z132323","Z164141","Z247088","Z367110","Z445950","Z450037"];
+const NOMES_NR35={
+  Z132322:"Apolinario",
+  Z132323:"Lailson",
+  Z164141:"Izidoro",
+  Z247088:"Matheus Henrique",
+  Z367110:"Alex Emidio",
+  Z445950:"Mateus Reis",
+  Z450037:"José Francisco"
+};
+
+function setStatusNR35(msg){
+  const el=document.getElementById("nr35BaseStatus");
+  if(el) el.innerHTML=msg;
+}
+function limparObjetoNR35(obj){
+  Object.keys(obj).forEach(k=>delete obj[k]);
+}
+function aplicarDadosNR35(payload,opcoes={}){
+  if(!payload||!payload.tecnicos) return false;
+  limparObjetoNR35(contatosPorTecnico);
+  limparObjetoNR35(contratosPorOsNR35);
+  limparObjetoNR35(codBaixaPorOsNR35);
+  Object.assign(contatosPorTecnico,payload.tecnicos||{});
+  Object.assign(contratosPorOsNR35,payload.contratosPorOs||{});
+  Object.assign(codBaixaPorOsNR35,payload.codBaixaPorOs||{});
+  if(!opcoes.semRender&&typeof renderizarTabelaNR35==="function") renderizarTabelaNR35();
+  return true;
+}
+function carregarNR35Salvo(){
+  try{
+    const payload=JSON.parse(localStorage.getItem(STORAGE_NR35_BASE)||"null");
+    if(!aplicarDadosNR35(payload,{semRender:true})) return false;
+    setStatusNR35(`Base NR35 carregada: <strong>${payload.fileName||"salva"}</strong>.`);
+    return true;
+  }catch(e){
+    console.warn("Falha ao carregar base NR35 salva.",e);
+    return false;
+  }
+}
+function valorCampoNR35(row,nomes){
+  if(typeof getField==="function") return getField(row,nomes);
+  const alvo=nomes.map(n=>String(n).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"_"));
+  for(const k of Object.keys(row||{})){
+    const kk=String(k).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"_");
+    if(alvo.includes(kk)) return row[k];
+  }
+  return "";
+}
+function textoNR35(v){
+  return String(v??"").trim();
+}
+function dataNR35(v){
+  const s=textoNR35(v);
+  if(!s) return "";
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+  if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s)){
+    const [d,m,y]=s.split(/[\/\s]/);
+    const ano=String(y||"").length===2?`20${y}`:y;
+    return `${ano}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  }
+  return s;
+}
+function horaValidaNR35(v){
+  const s=textoNR35(v);
+  return !!s&&s!=="-"&&s.toUpperCase()!=="N/A"&&s.toUpperCase()!=="NA";
+}
+function formatarPercentualNR35(valor){
+  const n=Number(valor)||0;
+  if(Number.isInteger(n)) return String(n);
+  return String(Math.round(n*100)/100).replace(".",",");
+}
+function montarDadosNR35(rows,fileName){
+  const tecnicos={};
+  const contratosPorOs={};
+  const codBaixaPorOs={};
+  rows.forEach(row=>{
+    const elegivel=textoNR35(valorCampoNR35(row,["ELEGIVEL","ELEGÍVEL"])).toUpperCase();
+    if(elegivel&&elegivel!=="SIM") return;
+    const codigo=textoNR35(valorCampoNR35(row,["LOGIN_FIELD","LOGIN FIELD","LOGIN_TECNICO","LOGIN TECNICO","TECNICO"])).toUpperCase();
+    if(!codigo) return;
+    const codOs=textoNR35(valorCampoNR35(row,["COD_OS","COD OS","ORDEM_SERVICO","ORDEM SERVICO","OS"]));
+    const contrato=textoNR35(valorCampoNR35(row,["CONTRATO"]));
+    const codBaixa=textoNR35(valorCampoNR35(row,["COD_BAIXA","COD BAIXA","CODIGO_BAIXA","CODIGO BAIXA"]));
+    const subiu=textoNR35(valorCampoNR35(row,["SUBIU","HORA_ENTRADA","HORA ENTRADA"]));
+    const desceu=textoNR35(valorCampoNR35(row,["DESCEU","HORA_SAIDA","HORA SAIDA","HORA_SAÍDA","HORA SAÍDA"]));
+    const tipo=textoNR35(valorCampoNR35(row,["TIPO_ORD_SRV","TIPO ORD SRV","TIPO_SERVICO","TIPO SERVICO","TIPO"]));
+    const item={
+      cod_os:codOs,
+      contrato:contrato||contratosPorOsNR35[codOs]||"-",
+      cod_baixa:codBaixa||codBaixaPorOsNR35[codOs]||"-",
+      data:dataNR35(valorCampoNR35(row,["DATA","DT_AGENDA","DATA_AGENDA","DATA AGENDA"])),
+      tipo:tipo||"-",
+      duracao:textoNR35(valorCampoNR35(row,["DURACAO","DURAÇÃO"]))||((horaValidaNR35(subiu)&&horaValidaNR35(desceu))?"0min":"N/A"),
+      subiu:horaValidaNR35(subiu)?subiu:"-",
+      desceu:horaValidaNR35(desceu)?desceu:"-"
+    };
+    if(codOs){
+      if(contrato) contratosPorOs[codOs]=contrato;
+      if(codBaixa) codBaixaPorOs[codOs]=codBaixa;
+    }
+    if(!tecnicos[codigo]){
+      tecnicos[codigo]={nome:NOMES_NR35[codigo]||codigo,codigo,total:0,com_altura:0,pct_altura:0,contratos:[]};
+    }
+    tecnicos[codigo].total++;
+    if(horaValidaNR35(item.subiu)&&horaValidaNR35(item.desceu)) tecnicos[codigo].com_altura++;
+    tecnicos[codigo].contratos.push(item);
+  });
+  Object.values(tecnicos).forEach(t=>{
+    t.pct_altura=t.total?Math.round((t.com_altura/t.total*100)*100)/100:0;
+    t.contratos.sort((a,b)=>String(b.data||"").localeCompare(String(a.data||"")));
+  });
+  return {fileName,date:new Date().toISOString(),tecnicos,contratosPorOs,codBaixaPorOs};
+}
+async function carregarBaseNR35(){
+  const input=document.getElementById("fileInputNR35");
+  const file=input?.files?.[0];
+  if(!file){setStatusNR35("Selecione uma base NR35 primeiro.");return}
+  try{
+    setStatusNR35(`Lendo <strong>${file.name}</strong>...`);
+    const {rows}=await obterRows(file);
+    if(!rows.length){setStatusNR35("Arquivo NR35 lido, mas sem linhas.");return}
+    const payload=montarDadosNR35(rows,file.name);
+    const totalTecnicos=Object.keys(payload.tecnicos).length;
+    const totalContratos=Object.values(payload.tecnicos).reduce((s,t)=>s+Number(t.total||0),0);
+    if(!totalTecnicos||!totalContratos){
+      setStatusNR35("Não encontrei registros NR35 válidos na planilha.");
+      return;
+    }
+    aplicarDadosNR35(payload);
+    let salvaLocal=true;
+    try{
+      localStorage.setItem(STORAGE_NR35_BASE,JSON.stringify(payload));
+    }catch(e){
+      salvaLocal=false;
+      console.warn("Base NR35 carregada, mas não foi salva no navegador.",e);
+    }
+    setStatusNR35(`Base NR35 carregada: <strong>${totalContratos}</strong> contratos em <strong>${totalTecnicos}</strong> técnico(s).${salvaLocal?"":" Não consegui salvar no navegador, mas ela está ativa nesta sessão."}`);
+  }catch(err){
+    console.error(err);
+    setStatusNR35(`Erro ao carregar base NR35: <strong>${err.message}</strong>`);
+  }
+}
+
 function abrirModal(codigo) {
   const dados = contatosPorTecnico[codigo];
   document.getElementById('modalTecnicoNome').textContent = dados.nome + ' (' + codigo + ')';
@@ -2303,10 +2451,12 @@ function renderizarTabelaNR35() {
   const tbody = document.getElementById('tabelaNR35');
   tbody.innerHTML = '';
   
-  const ordem = ['Z132322', 'Z132323', 'Z164141', 'Z247088', 'Z367110', 'Z445950', 'Z450037'];
+  const extras = Object.keys(contatosPorTecnico).filter(codigo => !ORDEM_NR35.includes(codigo)).sort();
+  const ordem = [...ORDEM_NR35, ...extras];
   
   ordem.forEach(codigo => {
     const dados = contatosPorTecnico[codigo];
+    if(!dados) return;
     const resumo = (window.currentSummary?.arr || currentSummary?.arr || []).find(t => String(t.login || '').toUpperCase() === codigo);
     const temResumo = !!resumo;
     const certificadoOk = temResumo ? !tecnicoEmAcompanhamento(resumo) : false;
@@ -2321,7 +2471,7 @@ function renderizarTabelaNR35() {
       <td class="tecnico-cell-nr35">
         ${dados.nome}<br><small style="color:var(--text-muted); font-weight:400;">${codigo}</small>
       </td>
-      <td style="text-align:center;"><span class="${classe} clicavel" onclick="abrirModal('${codigo}')" style="cursor:pointer;">${dados.pct_altura}%</span></td>
+      <td style="text-align:center;"><span class="${classe} clicavel" onclick="abrirModal('${codigo}')" style="cursor:pointer;">${formatarPercentualNR35(dados.pct_altura)}%</span></td>
       <td style="text-align:center;"><span class="cert-badge ${!temResumo ? 'cert-nao' : (certificadoOk ? 'cert-sim' : 'cert-nao')}">${!temResumo ? '-' : (certificadoOk ? 'CERTIFICADO' : 'NÃO CERTIFICADO')}</span></td>
       <td style="text-align:center;">${certidao !== '' ? `<span class="cert-badge ${Number(String(certidao).replace(',', '.')) >= 90 ? 'cert-sim' : 'cert-nao'}">${String(certidao).replace('.', ',')}%</span>` : '<span class="cert-badge cert-nao">-</span>'}</td>
       <td style="text-align:center;"><span class="cert-badge ${treinamentoOk ? 'cert-sim' : 'cert-nao'}">${treinamento || '-'}</span></td>
@@ -2330,9 +2480,19 @@ function renderizarTabelaNR35() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', renderizarTabelaNR35);
+document.addEventListener('DOMContentLoaded', ()=>{
+  carregarNR35Salvo();
+  renderizarTabelaNR35();
+  const btn=document.getElementById("btnCarregarNR35");
+  const input=document.getElementById("fileInputNR35");
+  if(btn) btn.addEventListener("click",carregarBaseNR35);
+  if(input) input.addEventListener("change",()=>{
+    const nome=input.files?.[0]?.name;
+    setStatusNR35(nome?`Base NR35 selecionada: <strong>${nome}</strong>. Clique em <strong>Carregar base NR35</strong>.`:"Nenhuma base NR35 selecionada.");
+  });
+});
 </script>
-<section id="performance_tecnico" class="tab-panel active">
+<section id="performance_tecnico" class="tab-panel">
 
   <!-- KPIs -->
   <section class="kpis">
@@ -2640,6 +2800,13 @@ document.addEventListener('DOMContentLoaded', renderizarTabelaNR35);
       <input type="file" id="fileInput" accept=".csv,.zip,.xlsx,.xls">
       <button id="btnCarregar" type="button">Carregar Base</button>
       <button id="btnLimpar" type="button" class="secondary">Limpar</button>
+    </div>
+    <div class="import-bar historico-import-bar nr35-import-bar">
+      <label for="fileInputNR35">Base NR35
+        <input type="file" id="fileInputNR35" accept=".csv,.xlsx,.xls">
+      </label>
+      <button id="btnCarregarNR35" type="button" class="secondary">Carregar base NR35</button>
+      <span id="nr35BaseStatus">Nenhuma base NR35 carregada nesta sessão.</span>
     </div>
     <div class="table-wrap" style="margin-top:14px">
       <table>
@@ -5439,9 +5606,9 @@ function encontrarUltimaBaseSalva(){
 function abrirAbaDashboard(){
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-  const btn=[...document.querySelectorAll(".tab-btn")].find(b=>b.dataset.tab==="performance_tecnico");
+  const btn=[...document.querySelectorAll(".tab-btn")].find(b=>b.dataset.tab==="nr35");
   if(btn) btn.classList.add("active");
-  if($("dashboard")) $("dashboard").classList.add("active");
+  if($("nr35")) $("nr35").classList.add("active");
 }
 
 function carregarUltimaBase(opcoes={}){
