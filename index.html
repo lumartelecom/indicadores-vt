@@ -2075,15 +2075,6 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 #consultivo .consultivo-table-filter{display:grid;gap:5px;min-width:260px;max-width:360px;flex:1}
 #consultivo .consultivo-table-filter label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)}
 #consultivo .consultivo-table-filter select{width:100%}
-#consultivo .consultivo-status-filter{display:grid;gap:6px;min-width:280px;flex:2}
-#consultivo .consultivo-status-filter>span{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)}
-#consultivo .consultivo-status-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-#consultivo .consultivo-status-chip{border:1px solid #d9e2ee;background:#fff;color:#334155;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:850;line-height:1;box-shadow:none}
-#consultivo .consultivo-status-chip:hover{background:#eef5ff;color:#17375f}
-#consultivo .consultivo-status-chip.active{background:#17375f;border-color:#17375f;color:#fff}
-#consultivo .consultivo-status-chip.instalado.active{background:#047857;border-color:#047857}
-#consultivo .consultivo-status-chip.pendente.active{background:#b45309;border-color:#b45309}
-#consultivo .consultivo-status-chip.cancelado.active,#consultivo .consultivo-status-chip.nao-concluido.active{background:#b91c1c;border-color:#b91c1c}
 #consultivo .consultivo-table .table-wrap{overflow-x:hidden}
 #consultivo .consultivo-table table{width:100%;min-width:0!important;table-layout:fixed;font-size:11px}
 #consultivo .consultivo-table th:nth-child(1),#consultivo .consultivo-table td:nth-child(1){width:13%}
@@ -2595,9 +2586,9 @@ button:hover,.btn:hover{transform:translateY(-1px)}
           <label for="consultivoFiltroTabelaTecnico">Filtrar lançamentos por técnico</label>
           <select id="consultivoFiltroTabelaTecnico"><option value="">Todos os técnicos</option></select>
         </div>
-        <div class="consultivo-status-filter">
-          <span>Filtrar lançamentos por status</span>
-          <div id="consultivoFiltroTabelaStatus" class="consultivo-status-chips" data-status=""></div>
+        <div class="consultivo-table-filter">
+          <label for="consultivoFiltroTabelaStatus">Filtrar lançamentos por status</label>
+          <select id="consultivoFiltroTabelaStatus"><option value="">Todos</option></select>
         </div>
       </div>
       <div class="table-wrap">
@@ -6729,7 +6720,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     s.statuses=consultivoStatusUnicos([...consultivoStatusPadrao(),...(s.statuses||[]),...s.records.map(r=>r.status)]);
     consultivoFillSelect("consultivoFiltroTecnico","Todos",s.tecnicos);
     consultivoFillSelect("consultivoFiltroTabelaTecnico","Todos os técnicos",s.tecnicos);
-    consultivoRenderStatusChips(consultivoStatusCadastrados(s));
+    consultivoFillSelect("consultivoFiltroTabelaStatus","Todos",["Instalado","Pendente","Não concluído"]);
     consultivoFillSelect("consultivoFiltroTipo","Todos",s.tipos);
     consultivoFillSelect("consultivoTipo","Selecione",s.tipos);
     consultivoFillSelect("consultivoFiltroStatus","Todos",["Instalado","Pendente","Não concluído"]);
@@ -6743,26 +6734,6 @@ document.addEventListener("DOMContentLoaded",()=>{
     el.innerHTML=`<option value="">${label}</option>`+values.map(v=>`<option value="${consultivoEsc(v)}">${consultivoEsc(v)}</option>`).join("");
     el.value=current;
   }
-  function consultivoRenderStatusChips(values){
-    const el=$("consultivoFiltroTabelaStatus"); if(!el) return;
-    let current=el.dataset.status||"";
-    if(current&&!values.includes(current)) current="";
-    el.dataset.status=current;
-    const statusList=["",...values];
-    el.innerHTML=statusList.map(status=>{
-      const label=status||"Todos";
-      const active=status===current?" active":"";
-      const klass=status?consultivoCategoriaClass(status):"todos";
-      return `<button class="consultivo-status-chip ${klass}${active}" type="button" data-status="${consultivoEsc(status)}">${consultivoEsc(label)}</button>`;
-    }).join("");
-    el.querySelectorAll(".consultivo-status-chip").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        el.dataset.status=btn.dataset.status||"";
-        el.querySelectorAll(".consultivo-status-chip").forEach(item=>item.classList.toggle("active",item===btn));
-        consultivoAplicarFiltros();
-      });
-    });
-  }
   function consultivoFillDatalist(id,values){const el=$(id); if(el) el.innerHTML=values.map(v=>`<option value="${consultivoEsc(v)}"></option>`).join("");}
   function consultivoAplicarFiltros(){
     const s=consultivoLoad();
@@ -6770,7 +6741,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     const tecnico=$("consultivoFiltroTecnico")?.value||"";
     const tecnicoTabela=$("consultivoFiltroTabelaTecnico")?.value||"";
     const status=$("consultivoFiltroStatus")?.value||"";
-    const statusTabela=$("consultivoFiltroTabelaStatus")?.dataset?.status||"";
+    const statusTabela=$("consultivoFiltroTabelaStatus")?.value||"";
     const tipo=$("consultivoFiltroTipo")?.value||"";
     const ini=$("consultivoDataInicio")?.value||"";
     const fim=$("consultivoDataFim")?.value||"";
@@ -6778,8 +6749,8 @@ document.addEventListener("DOMContentLoaded",()=>{
       const hay=consultivoNorm([r.tecnico,r.contrato,r.tipo,r.status,r.observacao].join(" "));
       const data=r.dataIndicacao||r.dataInstalacao||"";
       const nomeTecnico=consultivoNomeDashboard(r.tecnico);
-      const statusRegistro=consultivoFormatStatus(r.status);
-      return (!q||hay.includes(q))&&(!tecnico||nomeTecnico===tecnico)&&(!tecnicoTabela||nomeTecnico===tecnicoTabela)&&(!status||consultivoCategoriaStatus(r.status)===status)&&(!statusTabela||statusRegistro===statusTabela)&&(!tipo||r.tipo===tipo)&&(!ini||data>=ini)&&(!fim||data<=fim);
+      const categoriaStatus=consultivoCategoriaStatus(r.status);
+      return (!q||hay.includes(q))&&(!tecnico||nomeTecnico===tecnico)&&(!tecnicoTabela||nomeTecnico===tecnicoTabela)&&(!status||categoriaStatus===status)&&(!statusTabela||categoriaStatus===statusTabela)&&(!tipo||r.tipo===tipo)&&(!ini||data>=ini)&&(!fim||data<=fim);
     });
     consultivoRender();
   }
@@ -8826,10 +8797,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
-
-
-
-
 
 
 
