@@ -895,6 +895,21 @@ button:hover,.btn:hover{transform:translateY(-1px)}
 }
 .cert-sim{background:var(--green-light);color:#065f46;border-color:#a7f3d0}
 .cert-nao{background:var(--red-light);color:#9c2634;border-color:#f2b7b7}
+.cert-risco{background:var(--orange-light);color:#9a3412;border-color:#fed7aa}
+.cert-click{
+  border:1px solid currentColor;
+  cursor:pointer;
+  font-family:inherit;
+  line-height:1;
+  transition:filter .16s ease,transform .16s ease;
+}
+.cert-click:hover{filter:brightness(.97);transform:translateY(-1px)}
+.indicador-destaque{
+  min-width:0;
+  white-space:normal;
+  text-align:center;
+  line-height:1.1;
+}
 .cert-input-wrap{
   display:grid;
   grid-template-columns:82px auto;
@@ -2372,6 +2387,51 @@ function valorTreinamentoNR35(codigo) {
   return typeof valorSistemaCertificado === 'function' ? valorSistemaCertificado({}, codigo, 't1') : '';
 }
 
+function estadoIndicadorCertificacao(t,campo){
+  if(!t) return {classe:'cert-nao',status:'SEM BASE'};
+  if(indicadorFalhaCertificacao(t,campo)) return {classe:'cert-nao',status:'NÃO CERTIFICADO'};
+  if(indicadorRiscoCertificacao(t,campo)) return {classe:'cert-risco',status:'RISCO'};
+  return {classe:'cert-sim',status:'OK'};
+}
+function linhaResumoCertificacao(label,valor,estado,meta){
+  return `<tr>
+    <td><strong>${label}</strong></td>
+    <td>${valor}</td>
+    <td>${meta}</td>
+    <td><span class="cert-badge ${estado.classe}">${estado.status}</span></td>
+  </tr>`;
+}
+function abrirModalResumoCertificacaoTecnico(codigo){
+  const modal=$("modalIndicadorDetalhe");
+  const conteudo=$("modalIndicadorConteudo");
+  if(!modal||!conteudo) return;
+  const login=loginKey(codigo);
+  const resumo=(window.currentSummary?.arr || currentSummary?.arr || []).find(t=>loginKey(t.login)===login);
+  const [situacao,cor]=resumo?statusTecnico(resumo):["Não certificado","red"];
+  const linhas=resumo?[
+    linhaResumoCertificacao("Produção",`${num3(resumo.mediaContratos)} média/dia`,estadoIndicadorCertificacao(resumo,"producao"),`mín. ${num3(META_PRODUCAO)}`),
+    linhaResumoCertificacao("Revisita",pct(resumo.revPct),estadoIndicadorCertificacao(resumo,"revisita"),`até ${pct(META_REVISITA)}`),
+    linhaResumoCertificacao("TEC1",pct(resumo.tec1Pct),estadoIndicadorCertificacao(resumo,"tec1"),`mín. ${pct(META_TEC1)}`)
+  ].join(""):`<tr><td colspan="4"><div class="empty">Carregue a base de performance para visualizar produção, revisita e TEC1 deste técnico.</div></td></tr>`;
+
+  $("modalIndicadorTitulo").textContent=`Técnico Certificado - ${nomeTecnico(login)}`;
+  $("modalIndicadorSub").textContent=TECNICOS_NOMES[login]?login:"Resumo de certificação";
+  conteudo.innerHTML=`<div class="base-total-resumo">
+      <span class="base-total-chip active">${situacao.toUpperCase()}</span>
+      <span class="base-total-chip">Contratos: ${resumo?resumo.contratosExecutados:"-"}</span>
+      <span class="base-total-chip">Revisitas: ${resumo?resumo.revisitas:"-"}</span>
+      <span class="base-total-chip">Fora TEC1: ${resumo?resumo.tecFora:"-"}</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Indicador</th><th>Resultado</th><th>Meta</th><th>Situação</th></tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden","false");
+}
+
 function renderizarTabelaNR35() {
   const tbody = document.getElementById('tabelaNR35');
   tbody.innerHTML = '';
@@ -2384,7 +2444,8 @@ function renderizarTabelaNR35() {
     if(!dados) return;
     const resumo = (window.currentSummary?.arr || currentSummary?.arr || []).find(t => String(t.login || '').toUpperCase() === codigo);
     const temResumo = !!resumo;
-    const certificadoOk = temResumo ? !tecnicoEmAcompanhamento(resumo) : false;
+    const certificadoOk = temResumo ? !tecnicoNaoCertificado(resumo) : false;
+    const certificadoLabel = certificadoOk ? 'CERTIFICADO' : 'NÃO CERTIFICADO';
     const certidao = valorCertidaoNR35(codigo);
     const treinamento = valorTreinamentoNR35(codigo);
     const treinamentoOk = String(treinamento || '').toLowerCase() === 'realizado';
@@ -2397,7 +2458,7 @@ function renderizarTabelaNR35() {
         ${dados.nome}<br><small style="color:var(--text-muted); font-weight:400;">${codigo}</small>
       </td>
       <td style="text-align:center;"><span class="${classe} clicavel" onclick="abrirModal('${codigo}')" style="cursor:pointer;">${formatarPercentualNR35(dados.pct_altura)}%</span></td>
-      <td style="text-align:center;"><span class="cert-badge ${!temResumo ? 'cert-nao' : (certificadoOk ? 'cert-sim' : 'cert-nao')}">${!temResumo ? '-' : (certificadoOk ? 'CERTIFICADO' : 'NÃO CERTIFICADO')}</span></td>
+      <td style="text-align:center;"><button class="cert-badge cert-click ${certificadoOk ? 'cert-sim' : 'cert-nao'}" type="button" onclick="abrirModalResumoCertificacaoTecnico('${codigo}')">${certificadoLabel}</button></td>
       <td style="text-align:center;">${certidao !== '' ? `<span class="cert-badge ${Number(String(certidao).replace(',', '.')) >= 90 ? 'cert-sim' : 'cert-nao'}">${String(certidao).replace('.', ',')}%</span>` : '<span class="cert-badge cert-nao">-</span>'}</td>
       <td style="text-align:center;"><span class="cert-badge ${treinamentoOk ? 'cert-sim' : 'cert-nao'}">${treinamento || '-'}</span></td>
     `;
@@ -3556,21 +3617,47 @@ function nomeTecnico(login){const key=loginKey(login);return TECNICOS_NOMES[key]
 function rotuloTecnico(login){const key=loginKey(login);return TECNICOS_NOMES[key]?`${TECNICOS_NOMES[key]} — ${key}`:nomeTecnico(login)}
 function celulaTecnico(login){const key=loginKey(login);const nome=nomeTecnico(key);return `<strong class="tech-name">${nome}</strong>${TECNICOS_NOMES[key]?`<div class="tech-code">${key}</div>`:""}`}
 function ordemLoginIndex(login){const idx=ORDEM_TECNICOS.indexOf(loginKey(login));return idx===-1?999:idx}
-function tecnicoEmAcompanhamento(t){
-  return (Number(t.revPct)||0)>LIMITE_ACOMP_REVISITA
-    || (Number(t.tec1Pct)||0)<LIMITE_ACOMP_TEC1
-    || (Number(t.mediaContratos)||0)<META_PRODUCAO;
-}
-function statusTecnico(t){
-  if(tecnicoEmAcompanhamento(t)) return ["Em acompanhamento","yellow"];
-  return ["Certificado","green"];
-}
-
 const META_REVISITA=7;
 const META_TEC1=95;
 const META_PRODUCAO=5;
 const LIMITE_ACOMP_REVISITA=6;
 const LIMITE_ACOMP_TEC1=96;
+
+function indicadorFalhaCertificacao(t,campo){
+  if(campo==="revisita") return (Number(t?.revPct)||0)>META_REVISITA;
+  if(campo==="tec1") return (Number(t?.tec1Pct)||0)<META_TEC1;
+  if(campo==="producao") return (Number(t?.mediaContratos)||0)<META_PRODUCAO;
+  return false;
+}
+function tecnicoNaoCertificado(t){
+  return indicadorFalhaCertificacao(t,"revisita")
+    || indicadorFalhaCertificacao(t,"tec1")
+    || indicadorFalhaCertificacao(t,"producao");
+}
+function indicadorRiscoCertificacao(t,campo){
+  if(indicadorFalhaCertificacao(t,campo)) return false;
+  if(campo==="revisita") return (Number(t?.revPct)||0)>LIMITE_ACOMP_REVISITA;
+  if(campo==="tec1") return (Number(t?.tec1Pct)||0)<LIMITE_ACOMP_TEC1 && (Number(t?.tecBase)||0)>0;
+  return false;
+}
+function tecnicoEmAcompanhamento(t){
+  return tecnicoNaoCertificado(t)
+    || indicadorRiscoCertificacao(t,"revisita")
+    || indicadorRiscoCertificacao(t,"tec1");
+}
+function statusTecnico(t){
+  if(tecnicoNaoCertificado(t)) return ["Não certificado","red"];
+  return ["Certificado","green"];
+}
+function classeIndicadorCertificacao(t,campo){
+  if(indicadorFalhaCertificacao(t,campo)) return "cert-badge cert-nao indicador-destaque";
+  if(indicadorRiscoCertificacao(t,campo)) return "cert-badge cert-risco indicador-destaque";
+  return "";
+}
+function indicadorPerformanceHTML(t,campo,valor){
+  const classe=classeIndicadorCertificacao(t,campo);
+  return classe?`<span class="${classe}">${valor}</span>`:valor;
+}
 
 function vtParaMetaRevisita(t){
   const rev=Number(t.revisitas)||0;
@@ -3949,10 +4036,10 @@ function renderPlanoAcaoDetalhado(summary){
 function linhasTabelaPerformance(arr){
   return arr.map(t=>{const [lab,cor]=statusTecnico(t);return `<tr>
     <td>${celulaTecnico(t.login)}</td>
-    <td>${t.contratosExecutados}</td><td>${num3(t.mediaContratos)}</td><td>${t.revisitas}</td><td>${pct(t.revPct)}</td>
+    <td>${t.contratosExecutados}</td><td>${indicadorPerformanceHTML(t,"producao",num3(t.mediaContratos))}</td><td>${t.revisitas}</td><td>${indicadorPerformanceHTML(t,"revisita",pct(t.revPct))}</td>
     <td>${celulaMetaRevisitaVT(t.vtMetaRevisita)}</td>
     <td>${celulaMargemRevisita(t)}</td>
-    <td>${t.tecFora}</td><td>${pct(t.tec1Pct)}</td>
+    <td>${t.tecFora}</td><td>${indicadorPerformanceHTML(t,"tec1",pct(t.tec1Pct))}</td>
     <td>${celulaMetaVT(t.vtMetaTec1)}</td>
     <td><span class="badge ${cor}">${lab}</span></td>
   </tr>`}).join("");
@@ -3968,9 +4055,9 @@ function renderCardsMobilePerformance(id,summary){
     <div class="tech-mobile-head"><div>${celulaTecnico(t.login)}</div><span class="badge ${cor}">${lab}</span></div>
     <div class="mobile-metrics">
       <div class="metric-box"><span>Contratos executados</span><strong>${t.contratosExecutados}</strong></div>
-      <div class="metric-box"><span>Produção</span><strong>${num3(t.mediaContratos)} média/dia</strong></div>
-      <div class="metric-box"><span>Revisita 10d</span><strong>${pct(t.revPct)}</strong></div>
-      <div class="metric-box"><span>TEC1 30d</span><strong>${pct(t.tec1Pct)}</strong></div>
+      <div class="metric-box"><span>Produção</span><strong>${indicadorPerformanceHTML(t,"producao",`${num3(t.mediaContratos)} média/dia`)}</strong></div>
+      <div class="metric-box"><span>Revisita 10d</span><strong>${indicadorPerformanceHTML(t,"revisita",pct(t.revPct))}</strong></div>
+      <div class="metric-box"><span>TEC1 30d</span><strong>${indicadorPerformanceHTML(t,"tec1",pct(t.tec1Pct))}</strong></div>
       <div class="metric-box"><span>Fora janela</span><strong>${t.tecFora}</strong></div>
       <div class="metric-box"><span>VT Meta Rev.</span><strong>${t.vtMetaRevisita?`${t.vtMetaRevisita} VT`:""}</strong></div>
       <div class="metric-box"><span>Margem de revisita</span><strong>${margemRevisitaTecnico(t)} rev.</strong></div>
@@ -3995,7 +4082,7 @@ function linhaMediaPerformance(arr){
   const mediaFora=soma("tecFora")/qtd;
   const tec1Geral=totalTecBase?totalTecOk/totalTecBase*100:0;
   const mediaMetaTec1=arr.reduce((s,t)=>s+(Number(t.vtMetaTec1)||0),0)/qtd;
-  const certificados=arr.filter(t=>!tecnicoEmAcompanhamento(t)).length;
+  const certificados=arr.filter(t=>!tecnicoNaoCertificado(t)).length;
   return `<tr class="performance-total-row">
     <td><strong>Média geral</strong><div class="tech-code">${qtd} técnicos</div></td>
     <td>${num1(mediaContratos)}</td>
@@ -5057,16 +5144,16 @@ function calcularDesempenhoGeralCertificado(t,dados){
   const certidaoValor=normalizarPercentualCertificado(valorSistemaCertificado(dados,t.login,"certidao"));
   const t1Ok=t1Valor.toLowerCase()==="realizado";
   const desempenhos=[
-    desempenhoIndicadorCertificado(revPct,LIMITE_ACOMP_REVISITA,false),
-    desempenhoIndicadorCertificado(tec1Pct,LIMITE_ACOMP_TEC1,true),
+    desempenhoIndicadorCertificado(revPct,META_REVISITA,false),
+    desempenhoIndicadorCertificado(tec1Pct,META_TEC1,true),
     desempenhoIndicadorCertificado(producao,META_PRODUCAO,true),
     t1Ok?100:0,
     desempenhoIndicadorCertificado(certidaoValor,METAS_CERTIFICADO.certidao,true)
   ];
   const geral=desempenhos.reduce((s,v)=>s+v,0)/desempenhos.length;
   const indicadoresBatidos=[
-    revPct<=LIMITE_ACOMP_REVISITA,
-    tec1Pct>=LIMITE_ACOMP_TEC1 && (Number(t.tecBase)||0)>0,
+    revPct<=META_REVISITA,
+    tec1Pct>=META_TEC1 && (Number(t.tecBase)||0)>0,
     producao>=META_PRODUCAO,
     t1Ok,
     certidaoValor>=METAS_CERTIFICADO.certidao
@@ -5089,14 +5176,14 @@ function desempenhoGeralLinhaCertificado(tr){
   const producao=Number(tr?.dataset?.producao)||0;
   const t1Valor=String(tr?.querySelector('[data-campo="t1"]')?.value||"").trim();
   const certidaoValor=normalizarPercentualCertificado(tr?.querySelector('[data-campo="certidao"]')?.value||"");
-  const revOk=revPct<=LIMITE_ACOMP_REVISITA;
-  const tec1Ok=tec1Pct>=LIMITE_ACOMP_TEC1 && tecBase>0;
+  const revOk=revPct<=META_REVISITA;
+  const tec1Ok=tec1Pct>=META_TEC1 && tecBase>0;
   const prodOk=producao>=META_PRODUCAO;
   const t1Ok=t1Valor.toLowerCase()==="realizado";
   const certidaoOk=certidaoValor>=METAS_CERTIFICADO.certidao;
   const desempenhos=[
-    desempenhoIndicadorCertificado(revPct,LIMITE_ACOMP_REVISITA,false),
-    desempenhoIndicadorCertificado(tec1Pct,LIMITE_ACOMP_TEC1,true),
+    desempenhoIndicadorCertificado(revPct,META_REVISITA,false),
+    desempenhoIndicadorCertificado(tec1Pct,META_TEC1,true),
     desempenhoIndicadorCertificado(producao,META_PRODUCAO,true),
     t1Ok?100:0,
     desempenhoIndicadorCertificado(certidaoValor,METAS_CERTIFICADO.certidao,true)
@@ -5331,10 +5418,10 @@ function renderTecnicoCertificado(summary){
 
   const dados=carregarSistemicosCertificado();
   tbody.innerHTML=summary.arr.map(t=>{
-    const revOk=(Number(t.revPct)||0)<=LIMITE_ACOMP_REVISITA;
-    const tec1Ok=(Number(t.tec1Pct)||0)>=LIMITE_ACOMP_TEC1 && (Number(t.tecBase)||0)>0;
+    const revOk=(Number(t.revPct)||0)<=META_REVISITA;
+    const tec1Ok=(Number(t.tec1Pct)||0)>=META_TEC1 && (Number(t.tecBase)||0)>0;
     const prodOk=(Number(t.mediaContratos)||0)>=META_PRODUCAO;
-    const certificadoPerformance=!tecnicoEmAcompanhamento(t);
+    const certificadoPerformance=!tecnicoNaoCertificado(t);
 
     const t1Html=inputSistemicoCertificado(t.login,"t1",METAS_CERTIFICADO.t1,dados);
     const certidaoHtml=inputSistemicoCertificado(t.login,"certidao",METAS_CERTIFICADO.certidao,dados);
